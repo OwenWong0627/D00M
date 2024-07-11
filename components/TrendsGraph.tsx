@@ -30,6 +30,9 @@ const endY = chartHeight - (trendlineRatios[trendlineRatios.length - 1] * chartH
 const TrendsGraph: React.FC = () => {
   const [showTrendline, setShowTrendline] = useState(true);
 
+  // Define bar colors based on trendline state
+  const barColors = showTrendline ? ['#808080', '#fff'] : ['#000000', '#FFFFFF'];
+
   return (
     <View style={styles.container}>
       <Text style={styles.trendsText}>Weekly Average</Text>
@@ -41,7 +44,7 @@ const TrendsGraph: React.FC = () => {
             labels,
             legend: ['Used', 'Remaining'],
             data,
-            barColors: ['#000000', '#FFFFFF'],
+            barColors,
           }}
           width={chartWidth}
           height={chartHeight}
@@ -100,7 +103,7 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     overflow: 'hidden',
-    paddingLeft: -50,
+    paddingLeft: -50, // Cut off the left side a bit
     position: 'relative',
   },
   trendsText: {

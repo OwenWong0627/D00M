@@ -21,6 +21,12 @@ const Onboarding: React.FC = () => {
     setShowInitial(false);
   };
 
+  const scrollToNext = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: currentIndex + 1 });
+    }
+  };
+
   return (
     <View style={styles.container}>
       {showInitial ? (
@@ -29,7 +35,7 @@ const Onboarding: React.FC = () => {
         <>
           <FlatList
             data={onboardingContent}
-            renderItem={({ item }) => <OnboardingScreen item={item} />}
+            renderItem={({ item }) => <OnboardingScreen item={item} scrollToNext={scrollToNext} />}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}

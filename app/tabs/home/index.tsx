@@ -1,23 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-import Header from '../../components/Header';
-import CircleGraph from '../../components/CircleGraph';
-import TrendsGraph from '../../components/TrendsGraph';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import Header from '../../../components/Header';
+import CircleGraph from '../../../components/CircleGraph';
+import TrendsGraph from '../../../components/TrendsGraph';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Home: React.FC = () => {
+  const router = useRouter();
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Header />
       <CircleGraph />
       <Text style={styles.subtitle}>History</Text>
       <View style={styles.historyItem}>
-        <Image source={require('../../assets/images/tiktok.png')} style={styles.historyIcon} />
+        <Image source={require('../../../assets/images/tiktok.png')} style={styles.historyIcon} />
         <Text style={styles.historyText}>You d00med through TikTok for 20 minutes from 16:45 - 17:05</Text>
       </View>
       <Text style={styles.subtitle}>Trends</Text>
       <TrendsGraph />
       <Text style={styles.subtitle}>Awards</Text>
-      <Image source={require('../../assets/images/awards.png')} style={styles.awardsImage} />
+      <Image source={require('../../../assets/images/awards.png')} style={styles.awardsImage} />
     </ScrollView>
   );
 };
@@ -57,6 +61,9 @@ const styles = StyleSheet.create({
     aspectRatio: 2.25,
     marginTop: 10,
     borderRadius: 10,
+  },
+  icon: {
+    marginLeft: 20,
   },
 });
 

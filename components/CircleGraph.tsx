@@ -25,7 +25,6 @@ const CircleGraph: React.FC = () => {
             widthAndHeight={width / 2}
             series={data}
             sliceColor={colors}
-            doughnut={true}
             coverRadius={0.45}
             coverFill="#FFF"
           />

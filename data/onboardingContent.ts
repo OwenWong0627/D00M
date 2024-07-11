@@ -8,6 +8,7 @@ export interface OnboardingItem {
   image: any;
   hasButton?: boolean;
   buttonText?: string;
+  customComponent?: string;
   onPress?: () => void;
 }
 
@@ -49,9 +50,17 @@ export const onboardingContent: OnboardingItem[] = [
   },
   {
     id: '6',
+    title: 'Add a Goal!',
+    description: '',
+    image: null,
+    customComponent: 'GoalSettingPage',
+  },
+  {
+    id: '7',
     title: 'Your recommended app usage',
     description: 'Our in built AI predicts the above app usage for the upcoming days to help you along your journey in reducing doom scrolling. Feel free to adjust the sliders if needed.',
-    image: require('../assets/images/onboarding/onboarding6.png'),
+    image: null,
+    customComponent: 'SliderComponent',
     hasButton: true,
     buttonText: 'Got it, let\'s sign up!',
     onPress: () => {},
