@@ -1,17 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 const Success: React.FC = () => {
+  const router = useRouter();
+  
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/onboarding/signup.png')} style={styles.image} />
       <Text style={styles.title}>You’re all set!</Text>
-      <Link href="/" asChild>
-        <TouchableOpacity style={styles.homeButton}>
-          <Text style={styles.homeButtonText}>Home</Text>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity style={styles.homeButton} onPress={() => router.push('/tabs/home')}>
+        <Text style={styles.homeButtonText}>Home</Text>
+      </TouchableOpacity>
     </View>
   );
 };
