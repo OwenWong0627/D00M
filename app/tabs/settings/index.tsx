@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Foundation from 'react-native-vector-icons/Foundation';
-
+import { useRouter } from 'expo-router';
 
 const Settings: React.FC = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.profileTitle}>Your profile</Text>
@@ -40,7 +42,7 @@ const Settings: React.FC = () => {
           <Text style={styles.rowText}>Notifications</Text>
           <Ionicons name="chevron-forward-outline" size={24} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
+        <TouchableOpacity style={styles.row} onPress={() => router.push('/tabs/settings/permissions')}>
           <Ionicons name="key-outline" size={24} color="#000" style={styles.rowIcon} />
           <Text style={styles.rowText}>Permissions</Text>
           <Ionicons name="chevron-forward-outline" size={24} color="#000" />
