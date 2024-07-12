@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -77,13 +78,13 @@ const SignUp: React.FC = () => {
       <Text style={styles.orText}>Or sign up with</Text>
       <View style={styles.socialContainer}>
         <TouchableOpacity style={styles.socialButton}>
-          <Text style={styles.socialButtonText}></Text>
+          <FontAwesome name="apple" size={24} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Text style={styles.socialButtonText}>G</Text>
+          <FontAwesome name="google" size={24} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Text style={styles.socialButtonText}>f</Text>
+          <FontAwesome name="facebook" size={24} color="#000" />
         </TouchableOpacity>
       </View>
     </View>
