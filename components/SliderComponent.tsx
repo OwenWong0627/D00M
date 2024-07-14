@@ -6,10 +6,10 @@ const { width } = Dimensions.get('window');
 
 const SliderComponent: React.FC = () => {
   const initialSliders = [
-    { app: 'Instagram', icon: require('../assets/images/instagram.png'), max: 120, value: 60, color: '#8a3ab9' },
-    { app: 'Facebook', icon: require('../assets/images/facebook.png'), max: 120, value: 60, color: '#3b5998' },
-    { app: 'Twitter', icon: require('../assets/images/twitter.png'), max: 60, value: 30, color: '#1da1f2' },
-    { app: 'TikTok', icon: require('../assets/images/tiktok.png'), max: 60, value: 25, color: '#ee1d52' },
+    { app: 'Instagram', icon: require('../assets/images/instagram.png'), max: 90, value: 60, color: '#8a3ab9' },
+    { app: 'Facebook', icon: require('../assets/images/facebook.png'), max: 90, value: 60, color: '#3b5998' },
+    { app: 'Twitter', icon: require('../assets/images/twitter.png'), max: 90, value: 30, color: '#1da1f2' },
+    { app: 'TikTok', icon: require('../assets/images/tiktok.png'), max: 90, value: 25, color: '#ee1d52' },
   ];
 
   const [sliders, setSliders] = useState(initialSliders);
@@ -21,8 +21,8 @@ const SliderComponent: React.FC = () => {
   };
 
   const renderLabels = (max: number) => {
-    const interval = max / 4; // Assuming 4 intervals
-    const labels = Array.from({ length: 5 }, (_, i) => i * interval);
+    const interval = max / 3; // Assuming 4 intervals
+    const labels = Array.from({ length: 4 }, (_, i) => i * interval);
     return (
       <View style={styles.labelsContainer}>
         {labels.map((label, index) => (
@@ -43,7 +43,7 @@ const SliderComponent: React.FC = () => {
               minimumValue={0}
               maximumValue={slider.max}
               value={slider.value}
-              step={10}
+              step={5}
               minimumTrackTintColor={slider.color}
               maximumTrackTintColor="#d3d3d3"
               thumbTintColor={slider.color}
@@ -84,8 +84,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     position: 'absolute',
-    width: '100%',
-    top: 20,
+    width: '87.5%',
+    top: 25,
+    left: 15,
   },
   labelText: {
     fontSize: 10,

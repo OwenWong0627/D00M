@@ -10,10 +10,10 @@ const sharingFriends = [
 ];
 
 const invitedFriends = [
-  { id: '1', name: 'Brian', daysAgo: '200 days ago' },
-  { id: '2', name: 'Owen', daysAgo: '53 days ago' },
-  { id: '3', name: 'Anshu', daysAgo: '2 days ago' },
-  { id: '4', name: 'Kenny', daysAgo: '653 days ago' },
+  { id: '1', name: 'Brian', daysAgo: '1 day ago' },
+  { id: '2', name: 'Owen', daysAgo: '3 days ago' },
+  { id: '3', name: 'Anshu', daysAgo: '12 days ago' },
+  { id: '4', name: 'Kenny', daysAgo: '12 days ago' },
 ];
 
 const ShareScreen: React.FC = () => {

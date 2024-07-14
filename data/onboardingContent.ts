@@ -1,5 +1,6 @@
 import * as Linking from 'expo-linking';
 import { Link } from 'expo-router';
+import { Alert } from 'react-native';
 
 export interface OnboardingItem {
   id: string;
@@ -39,7 +40,14 @@ export const onboardingContent: OnboardingItem[] = [
     hasButton: true,
     buttonText: 'Give Access',
     onPress: () => {
-      Linking.openURL('https://google.com');
+      Alert.alert(
+        '"D00M" Would Like to Access the Screen Time?',
+        'Providing "D00M" access to Screen Time may allow it to see your activity data, restrict content, and limit the usage of apps and websites.',
+        [
+          // { text: 'Cancel', onPress: () => console.log('Access denied'), style: 'cancel' },
+          { text: 'Continue', onPress: () => console.log('Access granted') }
+        ]
+      );
     },
   },
   {

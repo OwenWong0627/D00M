@@ -42,12 +42,12 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
         value={title}
         onChangeText={setTitle}
       />
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+      {/* <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
         <Text>{date.toLocaleDateString()}</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateButton}>
         <Text>{date.toLocaleTimeString()}</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       {showDatePicker && (
         <DateTimePicker
           value={date}
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 80,
   },
   input: {
-    width: '100%',
+    width: '70%',
     padding: 10,
     marginBottom: 10,
     borderColor: '#ccc',
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dateButton: {
-    width: '100%',
+    width: '70%',
     padding: 10,
     marginBottom: 10,
     borderColor: '#ccc',
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
-    marginTop: 20,
+    marginTop: 50,
     textAlign: 'center',
   },
   skipButton: {

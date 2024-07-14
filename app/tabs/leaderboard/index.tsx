@@ -11,8 +11,10 @@ const friends = [
 
 const rankings = [
   { id: '1', name: 'James', streak: '52 Days', rank: 1 },
-  { id: '2', name: 'Eric', streak: '12 Days', rank: 2 },
-  { id: '3', name: 'Derek', streak: '5 Days', rank: 3 },
+  { id: '2', name: 'Eric', streak: '25 Days', rank: 2 },
+  { id: '3', name: 'Derek', streak: '12 Days', rank: 3 },
+  { id: '4', name: 'You', streak: '7 Days', rank: 4 },
+  { id: '5', name: 'George Fan', streak: '-', rank: 5 },
 ];
 
 const getRankImage = (rank: number) => {
@@ -69,13 +71,16 @@ const Leaderboard: React.FC = () => {
     },
     {
       title: 'WEEKLY RANKING',
-      data: rankings,
+      data: rankings.slice(0, 3),
       renderItem: ({ item }: { item: any }) => (
         <View style={styles.rankingContainer}>
           <Image source={getRankImage(item.rank)} style={styles.rankBadge} />
           <View style={styles.rankingInfo}>
             <Text style={styles.rankingName}>{item.name}</Text>
-            <Text style={styles.rankingStreak}>{item.streak}</Text>
+            <Text style={styles.rankingStreak}>
+              antid00m streak : {item.streak}
+              <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
+            </Text>
           </View>
           <Ionicons name="chevron-forward-outline" size={20} color="#000" />
         </View>
@@ -99,7 +104,14 @@ const Leaderboard: React.FC = () => {
         sections={sections}
         keyExtractor={(item, index) => item.id || index.toString()}
         renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionTitle}>{title}</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{title}</Text>
+            {title === 'WEEKLY RANKING' && (
+              <TouchableOpacity onPress={() => router.push('/tabs/leaderboard/allRankings')}>
+                <Text style={styles.seeAllText}>SEE ALL</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
         showsVerticalScrollIndicator={false}
       />
@@ -136,20 +148,26 @@ const styles = StyleSheet.create({
     height: 40,
     marginLeft: 10,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
   },
   highlightsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
   },
   trophyImage: {
-    width: 80,
-    height: 140,
+    width: 50,
+    height: 80,
   },
   friendsImage: {
     width: 30,
@@ -206,6 +224,13 @@ const styles = StyleSheet.create({
   rankingStreak: {
     fontSize: 14,
     color: '#666',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fireImage: {
+    width: 16,
+    height: 16,
+    marginLeft: 5,
   },
 });
 

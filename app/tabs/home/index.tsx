@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     aspectRatio: 2.25,
     marginTop: 10,
     borderRadius: 10,
+    opacity: 0.5,
   },
   icon: {
     marginLeft: 20,
