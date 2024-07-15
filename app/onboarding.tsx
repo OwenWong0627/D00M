@@ -10,11 +10,17 @@ const { width } = Dimensions.get('window');
 const Onboarding: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showInitial, setShowInitial] = useState(true);
+  const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const flatListRef = useRef<FlatList<OnboardingItem>>(null);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const newIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(newIndex);
+    if (newIndex === onboardingContent.length - 1) {
+      setIsScrollEnabled(false);
+    } else {
+      setIsScrollEnabled(true);
+    }
   };
 
   const handleStart = () => {
@@ -46,6 +52,7 @@ const Onboarding: React.FC = () => {
             decelerationRate="fast"
             snapToInterval={width}
             bounces={false}
+            scrollEnabled={isScrollEnabled}
           />
           <Pagination index={currentIndex} length={onboardingContent.length} />
         </>

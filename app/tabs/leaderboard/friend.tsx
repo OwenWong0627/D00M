@@ -17,7 +17,7 @@ const Friend: React.FC = () => {
         <Ionicons name="arrow-back-outline" size={24} color="#000" />
       </TouchableOpacity>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.subtitle}>In the running for 1st for 2 weeks</Text>
+      <Text style={styles.subtitle}>In the running for {id} for 2 weeks</Text>
       <Image source={image} style={styles.image} />
       <CircleGraph />
       <View style={styles.footer}>
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: -20,
+    bottom: 0,
     left: '5%',
     width: '100%',
     alignItems: 'center',
@@ -66,9 +66,7 @@ const styles = StyleSheet.create({
   },
   encourageButton: {
     backgroundColor: '#000',
-    paddingHorizontal: 10,
-    paddingTop: 0,
-    paddingBottom: 20,
+    padding: 10,
     borderRadius: 20,
     alignItems: 'center',
     width: '90%',

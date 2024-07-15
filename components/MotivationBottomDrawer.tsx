@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder, TouchableWithoutFeedback } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const motivationalMessages = [
@@ -11,12 +11,23 @@ const motivationalMessages = [
 
 const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredMessages, setFilteredMessages] = useState(motivationalMessages);
 
   useEffect(() => {
     if (!visible) {
-      setSelectedMessage(null); // Reset the selected message when the drawer is closed
+      setSelectedMessage(null);
+      setSearchQuery('');
     }
   }, [visible]);
+
+  useEffect(() => {
+    setFilteredMessages(
+      motivationalMessages.filter((message) =>
+        message.toLowerCase().startsWith(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery]);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -29,35 +40,44 @@ const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void }
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent} {...panResponder.panHandlers}>
-          <View style={styles.dragHandle} />
-          <View style={styles.searchContainer}>
-            <Ionicons name="search-outline" size={20} color="#000" />
-            <TextInput style={styles.searchInput} placeholder="Search for an encouragement" />
-          </View>
-          <Text style={styles.sectionTitle}>Encouragements</Text>
-          {motivationalMessages.map((message, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.messageButton,
-                selectedMessage === message && styles.selectedMessageButton,
-              ]}
-              onPress={() => setSelectedMessage(message)}
-            >
-              <Text style={styles.messageText}>{message}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity
-            style={[styles.doneButton, !selectedMessage && styles.disabledDoneButton]}
-            onPress={onClose}
-            disabled={!selectedMessage}
-          >
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback>
+            <View style={styles.modalContent} {...panResponder.panHandlers}>
+              <View style={styles.dragHandle} />
+              <View style={styles.searchContainer}>
+                <Ionicons name="search-outline" size={20} color="#000" />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search for an encouragement"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Encouragements</Text>
+              {filteredMessages.map((message, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.messageButton,
+                    selectedMessage === message && styles.selectedMessageButton,
+                  ]}
+                  onPress={() => setSelectedMessage(message)}
+                >
+                  <Text style={styles.messageText}>{message}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[styles.doneButton, !selectedMessage && styles.disabledDoneButton]}
+                onPress={onClose}
+                disabled={!selectedMessage}
+              >
+                <Text style={styles.doneButtonText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -66,7 +86,6 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0)',
   },
   modalContent: {
     backgroundColor: '#fff',

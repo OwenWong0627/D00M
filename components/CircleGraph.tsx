@@ -15,7 +15,11 @@ const colors = ['#600080', '#fff', '#c61aff', '#fff', '#ecb3ff', '#fff', '#ffcc6
 
 const data = screenTimeData.flatMap(d => [d.used, d.remaining]);
 
-const CircleGraph: React.FC = () => {
+interface CircleGraphProps {
+  disableLabels?: boolean;
+}
+
+const CircleGraph: React.FC<CircleGraphProps> = ({ disableLabels }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Limit Left</Text>
@@ -32,15 +36,17 @@ const CircleGraph: React.FC = () => {
             <Text style={styles.centerText}>2 HOURS{"\n"}55 MIN</Text>
           </View>
         </View>
-        <View style={styles.labelsContainer}>
-          {screenTimeData.map((d, index) => (
-            <View key={index} style={styles.label}>
-              <View style={[styles.colorBox, { backgroundColor: colors[index * 2] }]} />
-              <Image source={d.logo} style={styles.logo} />
-              <Text>: {d.used}/{d.limit} mins</Text>
-            </View>
-          ))}
-        </View>
+        {!disableLabels && (
+          <View style={styles.labelsContainer}>
+            {screenTimeData.map((d, index) => (
+              <View key={index} style={styles.label}>
+                <View style={[styles.colorBox, { backgroundColor: colors[index * 2] }]} />
+                <Image source={d.logo} style={styles.logo} />
+                <Text>: {d.used}/{d.limit} mins</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );

@@ -30,7 +30,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext 
   if (item.customComponent === 'SliderComponent') {
     return (
       <View style={styles.container}>
-        <SliderComponent />
+        <SliderComponent onSliderChange={() => {}}/>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
         {item.hasButton && (

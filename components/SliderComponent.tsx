@@ -4,7 +4,11 @@ import Slider from '@react-native-community/slider';
 
 const { width } = Dimensions.get('window');
 
-const SliderComponent: React.FC = () => {
+interface SliderComponentProps {
+  onSliderChange: () => void;
+}
+
+const SliderComponent: React.FC<SliderComponentProps> = ({ onSliderChange }) => {
   const initialSliders = [
     { app: 'Instagram', icon: require('../assets/images/instagram.png'), max: 90, value: 60, color: '#8a3ab9' },
     { app: 'Facebook', icon: require('../assets/images/facebook.png'), max: 90, value: 60, color: '#3b5998' },
@@ -18,6 +22,7 @@ const SliderComponent: React.FC = () => {
     const newSliders = [...sliders];
     newSliders[index].value = value;
     setSliders(newSliders);
+    onSliderChange(); // Call the callback prop to notify parent component of the change
   };
 
   const renderLabels = (max: number) => {

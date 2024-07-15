@@ -19,8 +19,10 @@ const FriendStats: React.FC = () => {
       <Text style={styles.title}>Leaderboard</Text>
       <Image source={image} style={styles.profileImage} />
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.streak}>{streak}</Text>
-      <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
+      <View style={styles.streakField}>
+        <Text style={styles.streak}>{streak}</Text>
+        <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
+      </View>
       <Text style={styles.screenTimeTitle}>SCREEN TIME</Text>
       <View style={styles.trendsGraph}>
         <TrendsGraph />
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
   streak: {
     fontSize: 18,
     textAlign: 'center',
-    marginBottom: 10,
+    marginRight: 4,
   },
   fireImage: {
     width: 16,
@@ -81,31 +83,28 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   trendsGraph: {
-    marginBottom: 30, // Add margin below the graph
+    marginBottom: 10,
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: '0%',
-    width: '100%',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: 'transparent',
+    marginBottom: 20,
   },
   encourageButton: {
     backgroundColor: '#000',
-    paddingHorizontal: 10,
-    paddingTop: 0,
-    paddingBottom: 20,
+    padding: 10,
     borderRadius: 20,
     alignItems: 'center',
-    width: '90%',
+    width: '100%',
   },
   encourageButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  streakField:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 export default FriendStats;

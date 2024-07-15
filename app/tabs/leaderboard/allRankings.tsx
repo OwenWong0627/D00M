@@ -42,6 +42,8 @@ const AllRankings: React.FC = () => {
               pathname: '/tabs/leaderboard/friendStats',
               params: { id: item.id, name: item.name, streak: item.streak, image: item.image },
             })}
+            disabled={item.name === 'You'}
+            style={item.name === 'You' ? styles.disabledTouchable : {}}
           >
             <View style={styles.rankingContainer}>
               {item.rank <= 3 ? (
@@ -121,6 +123,9 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     marginLeft: 5,
+  },
+  disabledTouchable: {
+    opacity: 0.5,
   },
 });
 

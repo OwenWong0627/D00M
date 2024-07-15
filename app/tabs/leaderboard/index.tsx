@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SectionList, FlatList } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 
-const friends = [
+const friendsData = [
   { id: '1', name: 'James', image: require('../../../assets/images/person1.png') },
   { id: '2', name: 'Eric', image: require('../../../assets/images/person2.png') },
   { id: '3', name: 'Derek', image: require('../../../assets/images/person3.png') },
 ];
 
 const rankings = [
-  { id: '1', name: 'James', streak: '52 Days', rank: 1 },
-  { id: '2', name: 'Eric', streak: '25 Days', rank: 2 },
-  { id: '3', name: 'Derek', streak: '12 Days', rank: 3 },
-  { id: '4', name: 'You', streak: '7 Days', rank: 4 },
-  { id: '5', name: 'George Fan', streak: '-', rank: 5 },
+  { id: '1', name: 'James Doe', streak: '52', rank: 1, image: require('../../../assets/images/person1.png') },
+  { id: '2', name: 'Eric Chen', streak: '25', rank: 2, image: require('../../../assets/images/person2.png') },
+  { id: '3', name: 'Deric', streak: '12', rank: 3, image: require('../../../assets/images/person3.png') },
+  { id: '4', name: 'You', streak: '7', rank: 4, image: require('../../../assets/images/person4.png') },
+  { id: '5', name: 'George Fan', streak: '-', rank: 5, image: require('../../../assets/images/person4.png') },
 ];
 
 const getRankImage = (rank: number) => {
@@ -31,7 +31,17 @@ const getRankImage = (rank: number) => {
 };
 
 const Leaderboard: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredFriends, setFilteredFriends] = useState(friendsData);
   const router = useRouter();
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    const filteredData = friendsData.filter((friend) =>
+      friend.name.toLowerCase().startsWith(query.toLowerCase())
+    );
+    setFilteredFriends(filteredData);
+  };
 
   const sections = [
     {
@@ -46,7 +56,7 @@ const Leaderboard: React.FC = () => {
     },
     {
       title: 'YOUR FRIENDS',
-      data: [friends], // Wrap friends array in another array to match expected data structure
+      data: [filteredFriends], // Wrap filtered friends array in another array to match expected data structure
       renderItem: ({ item }: { item: any }) => (
         <FlatList
           data={item}
@@ -73,17 +83,26 @@ const Leaderboard: React.FC = () => {
       title: 'WEEKLY RANKING',
       data: rankings.slice(0, 3),
       renderItem: ({ item }: { item: any }) => (
-        <View style={styles.rankingContainer}>
-          <Image source={getRankImage(item.rank)} style={styles.rankBadge} />
-          <View style={styles.rankingInfo}>
-            <Text style={styles.rankingName}>{item.name}</Text>
-            <Text style={styles.rankingStreak}>
-              antid00m streak : {item.streak}
-              <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
-            </Text>
+        <TouchableOpacity
+            onPress={() => router.push({
+              pathname: '/tabs/leaderboard/friendStats',
+              params: { id: item.id, name: item.name, streak: item.streak, image: item.image },
+            })}
+            disabled={item.name === 'You'}
+            style={item.name === 'You' ? styles.disabledTouchable : {}}
+          >
+          <View style={styles.rankingContainer}>
+            <Image source={getRankImage(item.rank)} style={styles.rankBadge} />
+            <View style={styles.rankingInfo}>
+              <Text style={styles.rankingName}>{item.name}</Text>
+              <Text style={styles.rankingStreak}>
+                antid00m streak : {item.streak} Days
+                <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward-outline" size={20} color="#000" />
           </View>
-          <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-        </View>
+        </TouchableOpacity>
       ),
     },
   ];
@@ -98,7 +117,12 @@ const Leaderboard: React.FC = () => {
       </View>
       <View style={styles.searchContainer}>
         <Ionicons name="search-outline" size={20} color="#000" />
-        <TextInput style={styles.searchInput} placeholder="Search a Friend in your list" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search a Friend in your list"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
       </View>
       <SectionList
         sections={sections}
@@ -231,6 +255,9 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     marginLeft: 5,
+  },
+  disabledTouchable: {
+    opacity: 0.5,
   },
 });
 

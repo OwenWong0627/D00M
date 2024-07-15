@@ -13,11 +13,11 @@ const Header: React.FC = () => {
         <Text style={styles.title}>DOOM</Text>
       </View>
       <View style={styles.rightContainer}>
-        <TouchableOpacity onPress={() => router.push('/tabs/home/calendar')}>
-          <Ionicons name="calendar-outline" size={24} color="#000" style={styles.icon} />
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => { /* Handle share press */ }}>
           <Ionicons name="share-outline" size={24} color="#000" style={styles.icon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/tabs/home/calendar')}>
+          <Ionicons name="calendar-outline" size={24} color="#000" style={styles.icon} />
         </TouchableOpacity>
       </View>
     </View>
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+    paddingVertical: 10,
     backgroundColor: '#fff',
   },
   leftContainer: {

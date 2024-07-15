@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Share } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Share } from 'react-native';
 import { useRouter } from 'expo-router';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -56,11 +56,18 @@ const ShareScreen: React.FC = () => {
           <Text style={styles.inviteText}>Invite a Friend</Text>
         </TouchableOpacity>
         {sharingFriends.map((friend) => (
-          <View key={friend.id} style={styles.friendRow}>
+          <TouchableOpacity
+            key={friend.id}
+            style={styles.friendRow}
+            onPress={() => router.push({
+              pathname: '/tabs/leaderboard/friend',
+              params: { id: friend.id, name: friend.name, image: friend.image },
+            })}
+          >
             <Image source={friend.image} style={styles.friendImage} />
             <Text style={styles.friendName}>{friend.name}</Text>
             <Ionicons name="chevron-forward-outline" size={24} color="#000" />
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
       <Text style={styles.sectionTitle}>INVITED</Text>

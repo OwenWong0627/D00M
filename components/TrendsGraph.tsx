@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Switch } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Switch, Modal, TouchableOpacity } from 'react-native';
 import { StackedBarChart } from 'react-native-chart-kit';
 import { Svg, Line } from 'react-native-svg';
+import CircleGraph from './CircleGraph'; // Adjust the import path as necessary
 
 const { width } = Dimensions.get('window');
 
@@ -21,7 +22,7 @@ const labels = screenTimeData.map(d => d.day);
 // Calculate trendline points based on ratios
 const chartHeight = 220;
 const chartWidth = width - 30;
-const margin = 35;
+const margin = 45;
 const trendlineRatios = screenTimeData.map(d => d.used / d.limit);
 
 const startY = chartHeight - (trendlineRatios[0] * chartHeight);
@@ -29,6 +30,13 @@ const endY = chartHeight - (trendlineRatios[trendlineRatios.length - 1] * chartH
 
 const TrendsGraph: React.FC = () => {
   const [showTrendline, setShowTrendline] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedBar, setSelectedBar] = useState<{ day: string; used: number; limit: number } | null>(null);
+
+  const handleBarPress = (index: number) => {
+    setSelectedBar(screenTimeData[index]);
+    setModalVisible(true);
+  };
 
   // Define bar colors based on trendline state
   const barColors = showTrendline ? ['#808080', '#fff'] : ['#000000', '#FFFFFF'];
@@ -85,11 +93,38 @@ const TrendsGraph: React.FC = () => {
             />
           </Svg>
         )}
+        <View style={styles.touchableOverlay}>
+          {screenTimeData.map((_, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.touchableBar, { width: (chartWidth / screenTimeData.length) - 10 }]}
+              onPress={() => handleBarPress(index)}
+            />
+          ))}
+        </View>
       </View>
       <View style={styles.trendlineSwitch}>
         <Text>Show Trendline</Text>
         <Switch value={showTrendline} onValueChange={setShowTrendline} />
       </View>
+      {selectedBar && (
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Details for {selectedBar.day}</Text>
+              <CircleGraph disableLabels={true} />
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -103,7 +138,6 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     overflow: 'hidden',
-    paddingLeft: -50, // Cut off the left side a bit
     position: 'relative',
   },
   trendsText: {
@@ -129,8 +163,43 @@ const styles = StyleSheet.create({
   },
   trendline: {
     position: 'absolute',
-    top: 0,
-    left: 0,
+  },
+  touchableOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    marginLeft: 35,
+  },
+  touchableBar: {
+    height: chartHeight,
+    backgroundColor: 'light-gray',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#000',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
