@@ -4,12 +4,12 @@ import { useRouter } from 'expo-router';
 
 const Success: React.FC = () => {
   const router = useRouter();
-  
+
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/onboarding/signup.png')} style={styles.image} />
       <Text style={styles.title}>You’re all set!</Text>
-      <TouchableOpacity style={styles.homeButton} onPress={() => router.push('/tabs/home')}>
+      <TouchableOpacity style={styles.homeButton} onPress={() => router.replace('/tabs/home')}>
         <Text style={styles.homeButtonText}>Home</Text>
       </TouchableOpacity>
     </View>

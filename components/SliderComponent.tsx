@@ -22,7 +22,7 @@ const SliderComponent: React.FC<SliderComponentProps> = ({ onSliderChange }) => 
     const newSliders = [...sliders];
     newSliders[index].value = value;
     setSliders(newSliders);
-    onSliderChange(); // Call the callback prop to notify parent component of the change
+    onSliderChange();
   };
 
   const renderLabels = (max: number) => {

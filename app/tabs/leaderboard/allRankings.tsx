@@ -6,9 +6,9 @@ import { useRouter } from 'expo-router';
 const rankings = [
   { id: '1', name: 'James Doe', streak: '52', rank: 1, image: require('../../../assets/images/person1.png') },
   { id: '2', name: 'Eric Chen', streak: '25', rank: 2, image: require('../../../assets/images/person2.png') },
-  { id: '3', name: 'Deric', streak: '12', rank: 3, image: require('../../../assets/images/person3.png') },
+  { id: '3', name: 'Derek', streak: '12', rank: 3, image: require('../../../assets/images/person3.png') },
   { id: '4', name: 'You', streak: '7', rank: 4, image: require('../../../assets/images/person4.png') },
-  { id: '5', name: 'George Fan', streak: '-', rank: 5, image: require('../../../assets/images/person4.png') },
+  // { id: '5', name: 'George Fan', streak: '-', rank: 5, image: require('../../../assets/images/person4.png') },
 ];
 
 const getRankImage = (rank: number) => {

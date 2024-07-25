@@ -11,7 +11,7 @@ const Settings: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.profileTitle}>Your profile</Text>
       <View style={styles.profileContainer}>
-        <Image source={require('../../../assets/images/person1.png')} style={styles.profileImage} />
+        <Image source={require('../../../assets/images/person4.png')} style={styles.profileImage} />
         <Text style={styles.profileName}>John Doe</Text>
       </View>
       <View style={styles.section}>

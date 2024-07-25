@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { registerUser } from '../scripts/authFunctions';
 
-const SignUp: React.FC = () => {
+const { width } = Dimensions.get('window');
+
+interface SignUpProps {
+  scrollToNext: () => void;
+  scrollForward: () => void;
+}
+
+const SignUp: React.FC<SignUpProps> = ({ scrollToNext, scrollForward }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isAgreed, setIsAgreed] = useState(false);
-  const [isEmailValid, setIsEmailValid] = useState(false);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
+  const [doPasswordsMatch, setDoPasswordsMatch] = useState(true);
   const [isFormValid, setIsFormValid] = useState(false);
-  const router = useRouter();
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,27 +32,39 @@ const SignUp: React.FC = () => {
   useEffect(() => {
     setIsEmailValid(validateEmail(email));
     setIsPasswordValid(validatePassword(password));
-  }, [email, password]);
+    setDoPasswordsMatch(password === confirmPassword);
+  }, [email, password, confirmPassword]);
 
   useEffect(() => {
-    setIsFormValid(isEmailValid && isPasswordValid && isAgreed);
-  }, [isEmailValid, isPasswordValid, isAgreed]);
+    setIsFormValid(isEmailValid && isPasswordValid && doPasswordsMatch && isAgreed && displayName.trim().length > 0);
+  }, [isEmailValid, isPasswordValid, doPasswordsMatch, isAgreed, displayName]);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!isFormValid) {
       Alert.alert('Error', 'Please fill all the fields correctly and agree to the terms.');
       return;
     }
-    // Navigate to success page
-    router.push('/success');
+
+    try {
+      await registerUser(email, password, displayName);
+      scrollToNext();
+    } catch (error) {
+      Alert.alert('Error', 'Registration failed. Please try again.');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={scrollForward}>
         <Text style={styles.backButtonText}>{'<'}</Text>
       </TouchableOpacity>
       <Text style={styles.title}>Create an account</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Display Name"
+        value={displayName}
+        onChangeText={setDisplayName}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -53,6 +73,7 @@ const SignUp: React.FC = () => {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+      {email.length !== 0 && !isEmailValid && <Text style={styles.errorText}>Please enter a valid email address.</Text>}
       <TextInput
         style={styles.input}
         placeholder="Password (at least 8 characters)"
@@ -60,6 +81,15 @@ const SignUp: React.FC = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
+      {password.length !== 0 && !isPasswordValid && <Text style={styles.errorText}>Password must be at least 8 characters long.</Text>}
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+      />
+      {confirmPassword.length !== 0 && !doPasswordsMatch && <Text style={styles.errorText}>Passwords do not match.</Text>}
       <View style={styles.agreementContainer}>
         <TouchableOpacity onPress={() => setIsAgreed(!isAgreed)} style={styles.checkbox}>
           {isAgreed && <View style={styles.checked} />}
@@ -75,27 +105,15 @@ const SignUp: React.FC = () => {
       >
         <Text style={[styles.signUpButtonText, isFormValid && styles.signUpButtonTextEnabled]}>Sign up</Text>
       </TouchableOpacity>
-      <Text style={styles.orText}>Or sign up with</Text>
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="logo-apple" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="logo-google" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Ionicons name="logo-facebook" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    width,
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
   },
   backButton: {
     marginBottom: 20,
@@ -116,8 +134,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginBottom: 5,
     backgroundColor: '#f9f9f9',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
   },
   agreementContainer: {
     flexDirection: 'row',
@@ -159,28 +182,6 @@ const styles = StyleSheet.create({
   },
   signUpButtonTextEnabled: {
     color: '#fff',
-  },
-  orText: {
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  socialButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#ddd',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 10,
-  },
-  socialButtonText: {
-    fontSize: 24,
-    color: '#000',
   },
 });
 

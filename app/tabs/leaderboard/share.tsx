@@ -6,7 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const sharingFriends = [
   { id: '1', name: 'James', image: require('../../../assets/images/person1.png') },
   { id: '2', name: 'Eric', image: require('../../../assets/images/person2.png') },
-  { id: '3', name: 'Deric', image: require('../../../assets/images/person3.png') },
+  { id: '3', name: 'Derek', image: require('../../../assets/images/person3.png') },
 ];
 
 const invitedFriends = [

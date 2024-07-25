@@ -1,25 +1,27 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { OnboardingItem } from '../data/onboardingContent';
+import { OnboardingItem, onboardingContent } from '../data/onboardingContent';
 import { useRouter } from 'expo-router';
 import GoalSettingPage from './GoalSettingPage';
 import SliderComponent from './SliderComponent';
+import SignUp from './SignUp'; // Import the SignUp component
 
 const { width } = Dimensions.get('window');
 
 interface OnboardingScreenProps {
   item: OnboardingItem;
   scrollToNext: () => void;
+  scrollForward: () => void;
 }
 
-const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext }) => {
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext, scrollForward }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    if (item.id === '7') {
-      router.push('/signup');
+    if (parseInt(item.id) === onboardingContent.length) {
+      router.replace('/success');
     } else if (item.onPress) {
-      item.onPress();
+      item.onPress(scrollToNext);
     }
   };
 
@@ -30,7 +32,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext 
   if (item.customComponent === 'SliderComponent') {
     return (
       <View style={styles.container}>
-        <SliderComponent onSliderChange={() => {}}/>
+        <SliderComponent
+          onSliderChange={() => {}}
+        />
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
         {item.hasButton && (
@@ -40,6 +44,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext 
         )}
       </View>
     );
+  }
+
+  if (item.customComponent === 'SignUp') {
+    return <SignUp scrollToNext={scrollToNext} scrollForward={scrollForward}/>;
   }
 
   return (

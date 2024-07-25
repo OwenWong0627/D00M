@@ -1,16 +1,83 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
 
-export default function Index() {
+const InitialScreen: React.FC = () => {
   const router = useRouter();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/onboarding');
-    }, 100); // Delay to ensure the layout is mounted
+  const handleGetStarted = () => {
+    router.push('/onboarding'); // Use replace to clear the navigation stack
+  };
 
-    return () => clearTimeout(timer);
-  }, [router]);
+  const handleSignIn = () => {
+    router.push('/signin'); // Adjust the path to your sign-in screen
+  };
 
-  return null;
-}
+  return (
+    <View style={styles.container}>
+      <Image source={require('../assets/images/D00M-icon.png')} style={styles.image} />
+      <Text style={styles.welcome}>Welcome to D00M!</Text>
+      <Text style={styles.message}>
+        We're thrilled you've chosen to embark on a journey to reduce your screen time.
+      </Text>
+      <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
+        <Text style={styles.getStartedButtonText}>Let’s get started!</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+        <Text style={styles.signInText}>Already have an account? <Text style={styles.signInLink}>Sign in</Text></Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 50,
+  },
+  welcome: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 18,
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 65,
+  },
+  getStartedButton: {
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  getStartedButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  signInButton: {
+    position: 'absolute',
+    bottom: 30,
+  },
+  signInText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  signInLink: {
+    textDecorationLine: 'underline',
+  },
+});
+
+export default InitialScreen;

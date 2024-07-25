@@ -33,8 +33,8 @@ const CalendarScreen: React.FC = () => {
       '2024-07-13': { color: '#ffcc66', textColor: 'black' },
       '2024-07-14': { color: '#ffcc66', textColor: 'black' },
       '2024-07-15': { color: '#ffcc66', textColor: 'black' },
-      // '2024-07-16': { color: '#ffcc66', textColor: 'black' },
-      // '2024-07-17': { color: '#ffcc66', textColor: 'black' },
+      '2024-07-16': { color: '#ffcc66', textColor: 'black' },
+      '2024-07-17': { color: '#ffcc66', textColor: 'black' },
     };
 
     return markedDates;
