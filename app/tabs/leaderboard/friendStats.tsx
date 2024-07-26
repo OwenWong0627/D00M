@@ -1,31 +1,99 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import TrendsGraph from '../../../components/TrendsGraph'; // Adjust the import path as necessary
-import MotivationBottomDrawer from '../../../components/MotivationBottomDrawer'; // Adjust the import path as necessary
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase/firebaseConfig';
+import CircleGraph from '../../../components/CircleGraph';
+import TrendsGraph from '../../../components/TrendsGraph';
+import { getLast7Days, getDayLabel } from '../../../utils/dateUtils';
+import MotivationBottomDrawer from '@/components/MotivationBottomDrawer';
 
 const FriendStats: React.FC = () => {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; name: string; streak: string; image: any }>();
-  const { name, streak, image } = params;
+  const params = useLocalSearchParams<{ id: string; name: string }>();
+  const { id, name } = params;
+  const [screenTimeData, setScreenTimeData] = useState([]);
+  const [trendsData, setTrendsData] = useState<{ day: string; used: number; limit: number; }[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDrawerVisible, setDrawerVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchScreenTimeData = async () => {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const screenTimeDocRef = doc(db, 'screenTimeData', id);
+        const screenTimeDocSnap = await getDoc(screenTimeDocRef);
+
+        if (screenTimeDocSnap.exists()) {
+          const screenTimeDoc = screenTimeDocSnap.data();
+          const dailyData = screenTimeDoc.dailyData;
+
+          if (dailyData && dailyData.length > 0) {
+            const latestData = dailyData[dailyData.length - 1].appUsage;
+            setScreenTimeData(latestData);
+
+            // Set trendsData for TrendsGraph
+            const last7Days = getLast7Days();
+            const trendsData = last7Days.map((date) => {
+              const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString() === date.toString()) || {
+                date,
+                totalScreenTime: 0,
+                appUsage: [],
+              };
+
+              const totalUsed = dayData.appUsage.reduce((acc: any, app: { used: any }) => acc + app.used, 0);
+              const totalLimit = dailyData[dailyData.length - 1].appUsage.reduce((acc: any, app: { limit: any }) => acc + app.limit, 0);
+
+              return {
+                day: getDayLabel(date),
+                used: totalUsed,
+                limit: totalLimit,
+              };
+            });
+
+            setTrendsData(trendsData);
+          } else {
+            setScreenTimeData([]);
+            setTrendsData([]);
+          }
+        } else {
+          setScreenTimeData([]);
+          setTrendsData([]);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching screen time data: ', error);
+        setLoading(false);
+      }
+    };
+
+    fetchScreenTimeData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Ionicons name="arrow-back-outline" size={24} color="#000" />
       </TouchableOpacity>
-      <Text style={styles.title}>Leaderboard</Text>
-      <Image source={image} style={styles.profileImage} />
-      <Text style={styles.name}>{name}</Text>
-      <View style={styles.streakField}>
-        <Text style={styles.streak}>{streak}</Text>
-        <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
+      <Text style={styles.title}>{name}'s Stats</Text>
+      <View style={styles.circleGraph}>
+        <CircleGraph screenTimeData={screenTimeData} />
       </View>
-      <Text style={styles.screenTimeTitle}>SCREEN TIME</Text>
       <View style={styles.trendsGraph}>
-        <TrendsGraph />
+        <TrendsGraph trendsData={trendsData} />
       </View>
       <View style={styles.footer}>
         <TouchableOpacity style={styles.encourageButton} onPress={() => setDrawerVisible(true)}>
@@ -35,6 +103,7 @@ const FriendStats: React.FC = () => {
       <MotivationBottomDrawer
         visible={isDrawerVisible}
         onClose={() => setDrawerVisible(false)}
+        recipientId={id}
       />
     </ScrollView>
   );
@@ -44,49 +113,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
+    paddingVertical: 20,
   },
   backButton: {
     alignSelf: 'flex-start',
     marginBottom: 20,
+    marginLeft: 20,
+    marginTop: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  circleGraph: {
     marginBottom: 20,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: 'center',
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  streak: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginRight: 4,
-  },
-  fireImage: {
-    width: 16,
-    height: 16,
-    alignSelf: 'center',
-  },
-  screenTimeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
   trendsGraph: {
-    marginBottom: 10,
+    marginHorizontal: 20,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footer: {
     marginBottom: 20,
+    marginHorizontal: 20,
   },
   encourageButton: {
     backgroundColor: '#000',
@@ -100,11 +153,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  streakField:{
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 });
 
 export default FriendStats;

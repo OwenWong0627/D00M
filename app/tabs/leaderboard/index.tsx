@@ -1,117 +1,99 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SectionList, FlatList } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-
-const friendsData = [
-  { id: '1', name: 'James', image: require('../../../assets/images/person1.png') },
-  { id: '2', name: 'Eric', image: require('../../../assets/images/person2.png') },
-  { id: '3', name: 'Derek', image: require('../../../assets/images/person3.png') },
-];
-
-const rankings = [
-  { id: '1', name: 'James Doe', streak: '52', rank: 1, image: require('../../../assets/images/person1.png') },
-  { id: '2', name: 'Eric Chen', streak: '25', rank: 2, image: require('../../../assets/images/person2.png') },
-  { id: '3', name: 'Derek', streak: '12', rank: 3, image: require('../../../assets/images/person3.png') },
-  { id: '4', name: 'You', streak: '7', rank: 4, image: require('../../../assets/images/person4.png') },
-  // { id: '5', name: 'George Fan', streak: '-', rank: 5, image: require('../../../assets/images/person4.png') },
-];
-
-const getRankImage = (rank: number) => {
-  switch (rank) {
-    case 1:
-      return require('../../../assets/images/first.png');
-    case 2:
-      return require('../../../assets/images/second.png');
-    case 3:
-      return require('../../../assets/images/third.png');
-    default:
-      return null;
-  }
-};
+import { auth, db } from '../../../firebase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Leaderboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredFriends, setFilteredFriends] = useState(friendsData);
+  const [friends, setFriends] = useState([]);
+  const [filteredFriends, setFilteredFriends] = useState([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const fetchFriends = async () => {
+    try {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const friendsArray = userData.friends || [];
+          
+          if (friendsArray.length === 0) {
+            setFriends([{ id: auth.currentUser.uid, name: 'You' }]);
+            setFilteredFriends([{ id: auth.currentUser.uid, name: 'You' }]);
+          } else {
+            const friendsDocs = await Promise.all(
+              friendsArray.map(friendId => getDoc(doc(db, 'users', friendId)))
+            );
+
+            let friendsData = friendsDocs.map(friendDoc => ({
+              id: friendDoc.id,
+              ...friendDoc.data()
+            }));
+
+            friendsData.push({ id: auth.currentUser.uid, name: auth.currentUser.displayName });
+
+            // Sort friends by name
+            friendsData.sort((a, b) => a.name.localeCompare(b.name));
+
+            setFriends(friendsData);
+            setFilteredFriends(friendsData);
+          }
+        }
+
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching friends: ", error);
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchFriends();
+    }, [])
+  );
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filteredData = friendsData.filter((friend) =>
-      friend.name.toLowerCase().startsWith(query.toLowerCase())
+    const filteredData = friends.filter((friend) =>
+      friend.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredFriends(filteredData);
   };
 
-  const sections = [
-    {
-      title: 'HIGHLIGHTS',
-      data: ['Recent awards and progress on rings from your friends will appear here'],
-      renderItem: ({ item }: { item: any }) => (
-        <View style={styles.highlightsContainer}>
-          <Image source={require('../../../assets/images/trophy.png')} style={styles.trophyImage} />
-          <Text style={styles.highlightsText}>{item}</Text>
-        </View>
-      ),
-    },
-    {
-      title: 'YOUR FRIENDS',
-      data: [filteredFriends], // Wrap filtered friends array in another array to match expected data structure
-      renderItem: ({ item }: { item: any }) => (
-        <FlatList
-          data={item}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(friend) => friend.id}
-          renderItem={({ item: friend }) => (
-            <TouchableOpacity
-              onPress={() => router.push({
-                pathname: '/tabs/leaderboard/friend',
-                params: { id: friend.id, name: friend.name, image: friend.image },
-              })}
-            >
-              <View style={styles.friendContainer}>
-                <Image source={friend.image} style={styles.friendImage} />
-                <Text style={styles.friendName}>{friend.name}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      ),
-    },
-    {
-      title: 'WEEKLY RANKING',
-      data: rankings.slice(0, 3),
-      renderItem: ({ item }: { item: any }) => (
-        <TouchableOpacity
-            onPress={() => router.push({
-              pathname: '/tabs/leaderboard/friendStats',
-              params: { id: item.id, name: item.name, streak: item.streak, image: item.image },
-            })}
-            disabled={item.name === 'You'}
-            style={item.name === 'You' ? styles.disabledTouchable : {}}
-          >
-          <View style={styles.rankingContainer}>
-            <Image source={getRankImage(item.rank)} style={styles.rankBadge} />
-            <View style={styles.rankingInfo}>
-              <Text style={styles.rankingName}>{item.name}</Text>
-              <Text style={styles.rankingStreak}>
-                antid00m streak : {item.streak} Days
-                <Image source={require('../../../assets/images/fire.png')} style={styles.fireImage} />
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-          </View>
-        </TouchableOpacity>
-      ),
-    },
-  ];
+  const getRankImage = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return require('../../../assets/images/first.png');
+      case 2:
+        return require('../../../assets/images/second.png');
+      case 3:
+        return require('../../../assets/images/third.png');
+      default:
+        return null;
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Leaderboard</Text>
-        <TouchableOpacity onPress={() => router.push('/tabs/leaderboard/share')}>
+        <TouchableOpacity onPress={() => router.push({ pathname: '/tabs/leaderboard/share', params: { refreshFriends: fetchFriends } })}>
           <Image source={require('../../../assets/images/friends.png')} style={styles.friendsImage} />
         </TouchableOpacity>
       </View>
@@ -124,19 +106,33 @@ const Leaderboard: React.FC = () => {
           onChangeText={handleSearch}
         />
       </View>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item, index) => item.id || index.toString()}
-        renderSectionHeader={({ section: { title } }) => (
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            {title === 'WEEKLY RANKING' && (
-              <TouchableOpacity onPress={() => router.push('/tabs/leaderboard/allRankings')}>
-                <Text style={styles.seeAllText}>SEE ALL</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>YOUR FRIENDS</Text>
+      </View>
+      <FlatList
+        data={filteredFriends}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => {
+          const isCurrentUser = item.id === auth.currentUser?.uid;
+          return (
+            <TouchableOpacity
+              onPress={() => !isCurrentUser && router.push({
+                pathname: '/tabs/leaderboard/friendStats',
+                params: { id: item.id, name: item.name },
+              })}
+              disabled={isCurrentUser}
+              style={isCurrentUser ? styles.disabledTouchable : {}}
+            >
+              <View style={[styles.rankingContainer, styles.friendItem]}>
+                <Image source={getRankImage(friends.indexOf(friends.find(friend => friend.name === item.name)) + 1)} style={styles.rankBadge} />
+                <View style={styles.rankingInfo}>
+                  <Text style={styles.rankingName}>{isCurrentUser ? 'You' : item.name}</Text>
+                </View>
+                <Ionicons name="chevron-forward-outline" size={20} color="#000" />
+              </View>
+            </TouchableOpacity>
+          );
+        }}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -182,56 +178,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  highlightsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-  },
-  trophyImage: {
-    width: 50,
-    height: 80,
-  },
   friendsImage: {
     width: 30,
     height: 30,
   },
-  highlightsText: {
-    flex: 1,
-    marginLeft: 20,
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#333',
-  },
-  friendContainer: {
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  friendImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginBottom: 5,
-  },
-  friendName: {
-    fontSize: 14,
-    color: '#333',
-  },
-  rankingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  seeAllText: {
-    color: '#000',
-  },
   rankingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
   },
   rankBadge: {
     width: 40,
@@ -245,19 +201,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  rankingStreak: {
-    fontSize: 14,
-    color: '#666',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fireImage: {
-    width: 16,
-    height: 16,
-    marginLeft: 5,
+  friendImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
   },
   disabledTouchable: {
     opacity: 0.5,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  friendItem: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    marginVertical: 5,
   },
 });
 

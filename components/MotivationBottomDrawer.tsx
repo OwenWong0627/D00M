@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder, TouchableWithoutFeedback, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase/firebaseConfig';
 
 const motivationalMessages = [
   'Way to prioritize your well-being!',
@@ -9,7 +11,7 @@ const motivationalMessages = [
   'Great to see you taking control.',
 ];
 
-const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
+const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void; recipientId: string }> = ({ visible, onClose, recipientId }) => {
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMessages, setFilteredMessages] = useState(motivationalMessages);
@@ -28,6 +30,34 @@ const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void }
       )
     );
   }, [searchQuery]);
+
+  const handleSendEncouragement = async () => {
+    if (!selectedMessage) return;
+
+    try {
+      const userDocRef = doc(db, 'users', recipientId);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const encouragement = {
+          message: selectedMessage,
+          sender: auth.currentUser?.displayName || 'Anonymous',
+          timestamp: new Date(),
+        };
+
+        await updateDoc(userDocRef, {
+          encouragements: arrayUnion(encouragement)
+        });
+
+        Alert.alert('Success', 'Encouragement sent successfully!');
+        onClose();
+      } else {
+        Alert.alert('Error', 'User not found.');
+      }
+    } catch (error) {
+      console.error('Error sending encouragement: ', error);
+      Alert.alert('Error', 'Failed to send encouragement.');
+    }
+  };
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -69,7 +99,7 @@ const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void }
               ))}
               <TouchableOpacity
                 style={[styles.doneButton, !selectedMessage && styles.disabledDoneButton]}
-                onPress={onClose}
+                onPress={handleSendEncouragement}
                 disabled={!selectedMessage}
               >
                 <Text style={styles.doneButtonText}>Done</Text>

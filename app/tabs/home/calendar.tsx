@@ -1,71 +1,99 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Calendar } from 'react-native-calendars';
 import { Dimensions } from 'react-native';
+import { auth, db } from '../../../firebase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 const screenWidth = Dimensions.get('window').width;
 
 const CalendarScreen: React.FC = () => {
   const router = useRouter();
-  const today = "2024-07-11";
+  const today = new Date().toLocaleDateString();
+  const [markedDates, setMarkedDates] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  const getMarkedDates = () => {
-    const markedDates = {
-      // Streak from July 1 to July 8
-      '2024-07-01': { startingDay: true, color: '#ffcc66', textColor: 'black' },
-      '2024-07-02': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-03': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-04': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-05': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-06': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-07': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-08': { endingDay: true, color: '#ffcc66', textColor: 'black' },
+  useEffect(() => {
+    const fetchScreenTimeData = async () => {
+      if (auth.currentUser) {
+        const screenTimeRef = doc(db, 'screenTimeData', auth.currentUser.uid);
+        const screenTimeDoc = await getDoc(screenTimeRef);
 
-      // Broken streak on July 9
-      '2024-07-09': { startingDay: true, endingDay: true, color: '#00f', textColor: 'white' },
+        if (screenTimeDoc.exists()) {
+          const data = screenTimeDoc.data();
+          const dailyData = data.dailyData;
 
-      // New streak starting on July 10
-      '2024-07-10': { startingDay: true, color: '#ffcc66', textColor: 'black' },
-      '2024-07-11': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-12': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-13': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-14': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-15': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-16': { color: '#ffcc66', textColor: 'black' },
-      '2024-07-17': { color: '#ffcc66', textColor: 'black' },
+          const datesUnderLimit = {};
+          dailyData.forEach((day, index) => {
+            const date = day.date.toDate().toLocaleDateString();
+            const isStreakDay = day.appUsage.every((app) => app.used <= app.limit);
+            if (isStreakDay) {
+              let markingType = 'single';
+
+              const prevDay = dailyData[index - 1];
+              const nextDay = dailyData[index + 1];
+
+              if (prevDay && nextDay && prevDay.appUsage.every((app) => app.used <= app.limit) && nextDay.appUsage.every((app) => app.used <= app.limit)) {
+                markingType = 'middle';
+              } else if (prevDay && prevDay.appUsage.every((app) => app.used <= app.limit)) {
+                markingType = 'end';
+              } else if (nextDay && nextDay.appUsage.every((app) => app.used <= app.limit)) {
+                markingType = 'start';
+              }
+
+              datesUnderLimit[date] = {
+                startingDay: markingType === 'start' || markingType === 'single',
+                endingDay: markingType === 'end' || markingType === 'single',
+                color: '#d4a017', // darker yellow color
+                textColor: '#4a4a4a' // darker gray color
+              };
+            }
+          });
+
+          setMarkedDates(datesUnderLimit);
+        }
+        setLoading(false);
+      }
     };
 
-    return markedDates;
-  };
+    fetchScreenTimeData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#d4a017" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Ionicons name="arrow-back-outline" size={24} color="#000" />
-        <Text style={styles.backText}>Back</Text>
+        <Ionicons name="arrow-back-outline" size={24} color="#d4a017" />
       </TouchableOpacity>
       <Calendar
         style={styles.calendar}
         current={today}
         markingType={'period'}
-        markedDates={getMarkedDates()}
+        markedDates={markedDates}
         theme={{
-          calendarBackground: '#232528',
-          textSectionTitleColor: '#a6a6a6',
-          textSectionTitleDisabledColor: '#d9d9d9',
-          selectedDayBackgroundColor: '#ffcc66',
-          selectedDayTextColor: '#000',
-          todayTextColor: '#ffcc66',
-          dayTextColor: '#ffcc66',
-          textDisabledColor: '#d9d9d9',
-          dotColor: '#ffcc66',
-          selectedDotColor: '#ffcc66',
-          arrowColor: '#ffcc66',
-          disabledArrowColor: '#d9d9d9',
-          monthTextColor: '#ffcc66',
-          indicatorColor: '#ffcc66',
+          calendarBackground: '#fff',
+          textSectionTitleColor: '#4a4a4a',
+          textSectionTitleDisabledColor: '#a6a6a6',
+          selectedDayBackgroundColor: '#d4a017',
+          selectedDayTextColor: '#4a4a4a',
+          todayTextColor: '#d4a017',
+          dayTextColor: '#4a4a4a',
+          textDisabledColor: '#a6a6a6',
+          dotColor: '#d4a017',
+          selectedDotColor: '#d4a017',
+          arrowColor: '#d4a017',
+          disabledArrowColor: '#a6a6a6',
+          monthTextColor: '#d4a017',
+          indicatorColor: '#d4a017',
           textDayFontFamily: 'monospace',
           textMonthFontFamily: 'monospace',
           textDayHeaderFontFamily: 'monospace',
@@ -84,21 +112,22 @@ const CalendarScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#232528',
+    backgroundColor: '#fff',
     padding: 20,
+    paddingTop: 30,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
-  backText: {
-    fontSize: 18,
-    marginLeft: -20,
-    color: '#ffcc66',
-  },
   calendar: {
     width: screenWidth - 40,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

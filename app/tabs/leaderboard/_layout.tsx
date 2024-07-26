@@ -5,8 +5,6 @@ export default function LeaderboardLayout() {
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="share" options={{ headerShown: false }} />
-      <Stack.Screen name="friend" options={{ headerShown: false }} />
-      <Stack.Screen name="allRankings" options={{ headerShown: false }} />
       <Stack.Screen name="friendStats" options={{ headerShown: false }} />
     </Stack>
   );

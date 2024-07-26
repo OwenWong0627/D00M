@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { auth } from '../firebase/firebaseConfig';
-import { createUserSettings } from '../scripts/authFunctions';
+import { useRouter } from 'expo-router';
+import { auth, db } from '../../../firebase/firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const { width } = Dimensions.get('window');
 
-interface GoalSettingPageProps {
-  scrollToNext: () => void;
-}
-
-const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
+const Goals: React.FC = () => {
+  const router = useRouter();
   const [goalType, setGoalType] = useState<'Reduce' | 'Maintain'>('Reduce');
   const [hours, setHours] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
@@ -19,6 +17,29 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [goal, setGoal] = useState('');
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'settings', auth.currentUser.uid);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setGoalType(data.goalType || 'Reduce');
+          setHours(data.hours || 0);
+          setMinutes(data.minutes || 0);
+          setDate(data.date ? new Date(data.date) : new Date());
+          setGoal(data.description || '');
+        } else {
+          console.log('No such document!');
+        }
+      } else {
+        Alert.alert('Error', 'No user is currently logged in.');
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
@@ -42,19 +63,13 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
         minutes,
         date: date.toISOString(),
         description: goal,
-        appLimits: [
-          { app: 'Instagram', limit: 0 },
-          { app: 'Facebook', limit: 0 },
-          { app: 'YouTube', limit: 0 },
-          { app: 'TikTok', limit: 0 },
-          { app: 'Snapchat', limit: 0 },
-          { app: 'Reddit', limit: 0 },
-          { app: 'X', limit: 0 },
-        ],
       };
 
-      await createUserSettings(auth.currentUser.uid, settings);
-      scrollToNext();
+      const userDocRef = doc(db, 'settings', auth.currentUser.uid);
+      await updateDoc(userDocRef, settings);
+      Alert.alert('Success', 'Goal updated successfully', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     } else {
       Alert.alert('Error', 'No user is currently logged in.');
     }
@@ -136,10 +151,7 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
         onPress={handleDone}
         disabled={!isButtonEnabled}
       >
-        <Text style={styles.doneButtonText}>I'm done</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.skipButton} onPress={handleDone}>
-        <Text style={styles.skipButtonText}>Skip</Text>
+        <Text style={styles.doneButtonText}>Change Goals</Text>
       </TouchableOpacity>
     </View>
   );
@@ -240,15 +252,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  skipButton: {
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
 });
 
-export default GoalSettingPage;
+export default Goals;

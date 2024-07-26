@@ -2,50 +2,51 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Switch, Modal, TouchableOpacity } from 'react-native';
 import { StackedBarChart } from 'react-native-chart-kit';
 import { Svg, Line } from 'react-native-svg';
-import CircleGraph from './CircleGraph'; // Adjust the import path as necessary
 
 const { width } = Dimensions.get('window');
 
-const screenTimeData = [
-  { day: 'T', used: 2, limit: 3.5 },
-  { day: 'F', used: 2, limit: 3 },
-  { day: 'S', used: 2, limit: 3 },
-  { day: 'S', used: 2.5, limit: 3.5 },
-  { day: 'M', used: 1.5, limit: 3.5 },
-  { day: 'T', used: 1.5, limit: 2.5 },
-  { day: 'Today', used: 1, limit: 3.5 },
-];
+interface TrendsGraphProps {
+  trendsData: { day: string; used: number; limit: number }[];
+}
 
-const data = screenTimeData.map(d => [d.used, d.limit - d.used]);
-const labels = screenTimeData.map(d => d.day);
-
-// Calculate trendline points based on ratios
 const chartHeight = 220;
 const chartWidth = width - 30;
 const margin = 45;
-const trendlineRatios = screenTimeData.map(d => d.used / d.limit);
 
-const startY = chartHeight - (trendlineRatios[0] * chartHeight);
-const endY = chartHeight - (trendlineRatios[trendlineRatios.length - 1] * chartHeight);
+const TrendsGraph: React.FC<TrendsGraphProps> = ({ trendsData }) => {
+  const [showTrendline, setShowTrendline] = useState(false);
 
-const TrendsGraph: React.FC = () => {
-  const [showTrendline, setShowTrendline] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedBar, setSelectedBar] = useState<{ day: string; used: number; limit: number } | null>(null);
-
-  const handleBarPress = (index: number) => {
-    setSelectedBar(screenTimeData[index]);
-    setModalVisible(true);
-  };
-
-  // Define bar colors based on trendline state
   const barColors = showTrendline ? ['#808080', '#fff'] : ['#000000', '#FFFFFF'];
+
+  const data = trendsData.map(d => [Math.min(d.used, d.limit), d.limit - Math.min(d.used, d.limit)]) as number[][];
+  const labels = trendsData.map(d => d.day);
+
+  const trendlineRatios = trendsData.map(d => d.used / d.limit);
+
+  const startY = chartHeight - (trendlineRatios[0] * chartHeight);
+  const endY = chartHeight - (trendlineRatios[trendlineRatios.length - 1] * chartHeight);
+
+  const weeklyAverageUsed = (trendsData.reduce((acc, data) => acc + data.used, 0) / trendsData.length).toFixed(2);
+  const weeklyAverageLimit = (trendsData.reduce((acc, data) => acc + data.limit, 0) / trendsData.length).toFixed(0);
+
+  const chartConfig = {
+    backgroundColor: '#F0F0F0',
+    backgroundGradientFrom: '#F0F0F0',
+    backgroundGradientTo: '#F0F0F0',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    barPercentage: 0.5,
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.trendsText}>Weekly Average</Text>
-      <Text style={styles.averageTime}>2h 25m</Text>
-      <Text style={styles.limitText}>Limit: 3h 55m</Text>
+      <Text style={styles.averageTime}>{weeklyAverageUsed} minutes</Text>
+      <Text style={styles.limitText}>Limit: {weeklyAverageLimit} minutes</Text>
       <View style={styles.chartContainer}>
         <StackedBarChart
           data={{
@@ -56,7 +57,8 @@ const TrendsGraph: React.FC = () => {
           }}
           width={chartWidth}
           height={chartHeight}
-          yAxisSuffix="h"
+          yAxisSuffix="m"
+          decimalPlaces={0}
           chartConfig={{
             backgroundColor: '#F0F0F0',
             backgroundGradientFrom: '#F0F0F0',
@@ -89,42 +91,15 @@ const TrendsGraph: React.FC = () => {
               y2={endY}
               stroke="red"
               strokeWidth="2"
-              strokeDasharray="4, 4" // Dotted line
+              strokeDasharray="4, 4"
             />
           </Svg>
         )}
-        <View style={styles.touchableOverlay}>
-          {screenTimeData.map((_, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.touchableBar, { width: (chartWidth / screenTimeData.length) - 10 }]}
-              onPress={() => handleBarPress(index)}
-            />
-          ))}
-        </View>
       </View>
-      <View style={styles.trendlineSwitch}>
+      {/* <View style={styles.trendlineSwitch}>
         <Text>Show Trendline</Text>
         <Switch value={showTrendline} onValueChange={setShowTrendline} />
-      </View>
-      {selectedBar && (
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Details for {selectedBar.day}</Text>
-              <CircleGraph disableLabels={true} />
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      )}
+      </View> */}
     </View>
   );
 };
