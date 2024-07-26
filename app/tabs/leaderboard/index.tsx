@@ -18,14 +18,14 @@ const Leaderboard: React.FC = () => {
       if (auth.currentUser) {
         const userDocRef = doc(db, 'users', auth.currentUser.uid);
         const userDocSnap = await getDoc(userDocRef);
-        
+
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           const friendsArray = userData.friends || [];
-          
+
           if (friendsArray.length === 0) {
-            setFriends([{ id: auth.currentUser.uid, name: 'You' }]);
-            setFilteredFriends([{ id: auth.currentUser.uid, name: 'You' }]);
+            setFriends([{ id: auth.currentUser.uid, name: 'You', streak: 0 }]);
+            setFilteredFriends([{ id: auth.currentUser.uid, name: 'You', streak: 0 }]);
           } else {
             const friendsDocs = await Promise.all(
               friendsArray.map(friendId => getDoc(doc(db, 'users', friendId)))
@@ -38,11 +38,32 @@ const Leaderboard: React.FC = () => {
 
             friendsData.push({ id: auth.currentUser.uid, name: auth.currentUser.displayName });
 
-            // Sort friends by name
-            friendsData.sort((a, b) => a.name.localeCompare(b.name));
+            // Fetch and calculate streaks
+            const friendsWithStreaks = await Promise.all(
+              friendsData.map(async (friend) => {
+                const screenTimeRef = doc(db, 'screenTimeData', friend.id);
+                const screenTimeDoc = await getDoc(screenTimeRef);
 
-            setFriends(friendsData);
-            setFilteredFriends(friendsData);
+                let streak = 0;
+                if (screenTimeDoc.exists()) {
+                  const dailyData = screenTimeDoc.data().dailyData;
+                  streak = calculateCurrentStreak(dailyData);
+                }
+
+                return { ...friend, streak };
+              })
+            );
+
+            // Sort friends by streak (desc) and name (asc)
+            friendsWithStreaks.sort((a, b) => {
+              if (b.streak === a.streak) {
+                return a.name.localeCompare(b.name);
+              }
+              return b.streak - a.streak;
+            });
+
+            setFriends(friendsWithStreaks);
+            setFilteredFriends(friendsWithStreaks);
           }
         }
 
@@ -66,6 +87,27 @@ const Leaderboard: React.FC = () => {
       friend.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredFriends(filteredData);
+  };
+
+  const calculateCurrentStreak = (dailyData) => {
+    let streak = 0;
+    const today = new Date().toLocaleDateString();
+
+    for (let i = dailyData.length - 1; i >= 0; i--) {
+      const day = dailyData[i];
+      const date = day.date.toDate().toLocaleDateString();
+
+      if (date > today) continue;
+
+      const isStreakDay = day.appUsage.every(app => app.used <= app.limit);
+      if (isStreakDay) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
   };
 
   const getRankImage = (rank: number) => {
@@ -118,7 +160,7 @@ const Leaderboard: React.FC = () => {
             <TouchableOpacity
               onPress={() => !isCurrentUser && router.push({
                 pathname: '/tabs/leaderboard/friendStats',
-                params: { id: item.id, name: item.name },
+                params: { id: item.id, name: item.name, streak: item.streak.toString() },
               })}
               disabled={isCurrentUser}
               style={isCurrentUser ? styles.disabledTouchable : {}}
@@ -127,6 +169,7 @@ const Leaderboard: React.FC = () => {
                 <Image source={getRankImage(friends.indexOf(friends.find(friend => friend.name === item.name)) + 1)} style={styles.rankBadge} />
                 <View style={styles.rankingInfo}>
                   <Text style={styles.rankingName}>{isCurrentUser ? 'You' : item.name}</Text>
+                  <Text style={styles.streakText}>Streak: {item.streak} days 🔥</Text>
                 </View>
                 <Ionicons name="chevron-forward-outline" size={20} color="#000" />
               </View>
@@ -200,6 +243,10 @@ const styles = StyleSheet.create({
   rankingName: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  streakText: {
+    fontSize: 14,
+    color: '#777',
   },
   friendImage: {
     width: 40,

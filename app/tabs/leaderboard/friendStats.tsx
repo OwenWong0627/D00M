@@ -11,8 +11,8 @@ import MotivationBottomDrawer from '@/components/MotivationBottomDrawer';
 
 const FriendStats: React.FC = () => {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; name: string }>();
-  const { id, name } = params;
+  const params = useLocalSearchParams<{ id: string; name: string, streak: string }>();
+  const { id, name, streak } = params;
   const [screenTimeData, setScreenTimeData] = useState([]);
   const [trendsData, setTrendsData] = useState<{ day: string; used: number; limit: number; }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ const FriendStats: React.FC = () => {
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Ionicons name="arrow-back-outline" size={24} color="#000" />
       </TouchableOpacity>
-      <Text style={styles.title}>{name}'s Stats</Text>
+      <Text style={styles.title}>{name}'s Stats, {streak} days 🔥</Text>
       <View style={styles.circleGraph}>
         <CircleGraph screenTimeData={screenTimeData} />
       </View>
