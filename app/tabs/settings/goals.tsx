@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import RNPickerSelect from 'react-native-picker-select';
 import { useRouter } from 'expo-router';
 import { auth, db } from '../../../firebase/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -75,6 +75,16 @@ const Goals: React.FC = () => {
     }
   };
 
+  const hoursOptions = Array.from(Array(24).keys()).map((h) => ({
+    label: `${h}`,
+    value: h,
+  }));
+
+  const minutesOptions = Array.from(Array(60).keys()).map((m) => ({
+    label: `${m}`,
+    value: m,
+  }));
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add a Goal!</Text>
@@ -101,25 +111,25 @@ const Goals: React.FC = () => {
       <View style={styles.rowContainer}>
         <Text style={styles.label}>My screen time to</Text>
         <View style={styles.timePickerContainer}>
-          <Picker
-            selectedValue={hours}
-            style={styles.picker}
-            onValueChange={(itemValue) => setHours(itemValue)}
-          >
-            {Array.from(Array(24).keys()).map((h) => (
-              <Picker.Item key={h} label={`${h}`} value={h} />
-            ))}
-          </Picker>
+          <TouchableOpacity style={styles.pickerContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => setHours(value)}
+              items={hoursOptions}
+              value={hours}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+            />
+          </TouchableOpacity>
           <Text style={styles.timeText}>h</Text>
-          <Picker
-            selectedValue={minutes}
-            style={styles.picker}
-            onValueChange={(itemValue) => setMinutes(itemValue)}
-          >
-            {Array.from(Array(60).keys()).map((m) => (
-              <Picker.Item key={m} label={`${m}`} value={m} />
-            ))}
-          </Picker>
+          <TouchableOpacity style={styles.pickerContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => setMinutes(value)}
+              items={minutesOptions}
+              value={minutes}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+            />
+          </TouchableOpacity>
           <Text style={styles.timeText}>m</Text>
         </View>
       </View>
@@ -156,6 +166,35 @@ const Goals: React.FC = () => {
     </View>
   );
 };
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    color: 'black',
+    paddingRight: 30,
+    marginLeft: 10,
+    marginRight: 40,
+    marginBottom: 5,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 0.5,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    color: 'black',
+    paddingRight: 30,
+    marginLeft: 10,
+    marginRight: 40,
+    marginBottom: 5,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -213,13 +252,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: -15,
   },
-  picker: {
-    height: 50,
+  pickerContainer: {
     width: 100,
-    marginRight: -10,
   },
   timeText: {
-    marginHorizontal: 0,
+    marginLeft: -30,
   },
   dateButton: {
     padding: 10,
