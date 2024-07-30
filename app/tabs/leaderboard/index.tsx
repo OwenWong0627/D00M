@@ -8,8 +8,8 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const Leaderboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [friends, setFriends] = useState([]);
-  const [filteredFriends, setFilteredFriends] = useState([]);
+  const [friends, setFriends] = useState<{ id: string; name: string; streak: number; }[]>([]);
+  const [filteredFriends, setFilteredFriends] = useState<{ id: string; name: string; streak: number; }[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -28,7 +28,8 @@ const Leaderboard: React.FC = () => {
             setFilteredFriends([{ id: auth.currentUser.uid, name: 'You', streak: 0 }]);
           } else {
             const friendsDocs = await Promise.all(
-              friendsArray.map(friendId => getDoc(doc(db, 'users', friendId)))
+              friendsArray.map(
+                (friendId: any) => getDoc(doc(db, 'users', friendId)))
             );
 
             let friendsData = friendsDocs.map(friendDoc => ({
@@ -89,7 +90,7 @@ const Leaderboard: React.FC = () => {
     setFilteredFriends(filteredData);
   };
 
-  const calculateCurrentStreak = (dailyData) => {
+  const calculateCurrentStreak = (dailyData: any) => {
     let streak = 0;
     const today = new Date().toLocaleDateString();
 
@@ -99,7 +100,7 @@ const Leaderboard: React.FC = () => {
 
       if (date > today) continue;
 
-      const isStreakDay = day.appUsage.every(app => app.used <= app.limit);
+      const isStreakDay = day.appUsage.every((app: any) => app.used <= app.limit);
       if (isStreakDay) {
         streak++;
       } else {
@@ -135,7 +136,7 @@ const Leaderboard: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Leaderboard</Text>
-        <TouchableOpacity onPress={() => router.push({ pathname: '/tabs/leaderboard/share', params: { refreshFriends: fetchFriends } })}>
+        <TouchableOpacity onPress={() => router.push({ pathname: '/tabs/leaderboard/share' })}>
           <Image source={require('../../../assets/images/friends.png')} style={styles.friendsImage} />
         </TouchableOpacity>
       </View>
@@ -166,7 +167,7 @@ const Leaderboard: React.FC = () => {
               style={isCurrentUser ? styles.disabledTouchable : {}}
             >
               <View style={[styles.rankingContainer, styles.friendItem]}>
-                <Image source={getRankImage(friends.indexOf(friends.find(friend => friend.name === item.name)) + 1)} style={styles.rankBadge} />
+                <Image source={getRankImage(friends.indexOf((friends.find(friend => friend.name === item.name)) ?? {id: '', name: 'John Doe', streak: 0}) + 1)} style={styles.rankBadge} />
                 <View style={styles.rankingInfo}>
                   <Text style={styles.rankingName}>{isCurrentUser ? 'You' : item.name}</Text>
                   <Text style={styles.streakText}>Streak: {item.streak} days 🔥</Text>

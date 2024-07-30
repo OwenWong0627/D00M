@@ -6,10 +6,9 @@ import { auth, db } from '../../../firebase/firebaseConfig';
 import { doc, getDoc, collection, getDocs, updateDoc, arrayUnion } from 'firebase/firestore';
 
 const ShareScreen: React.FC = () => {
-  const [friendRequests, setFriendRequests] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [friends, setFriends] = useState([]);
-  const [outgoingRequests, setOutgoingRequests] = useState([]);
+  const [friendRequests, setFriendRequests] = useState<{ id: string, name: string, email: string }[]>([]);
+  const [users, setUsers] = useState<{ id: string, name: string, email: string }[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -27,13 +26,12 @@ const ShareScreen: React.FC = () => {
             const outgoingRequestsArray = userData.outgoingRequests || [];
 
             setFriendRequests(friendRequestsArray);
-            setFriends(friendsArray);
             setOutgoingRequests(outgoingRequestsArray);
 
             const allUsersSnapshot = await getDocs(collection(db, 'users'));
             const allUsers = allUsersSnapshot.docs
-              .map(doc => ({ id: doc.id, ...doc.data() }))
-              .filter(user => user.id !== auth.currentUser.uid && !friendsArray.includes(user.id));
+              .map(doc => ({ id: doc.id, name: doc.data().name, email: doc.data().email }))
+              .filter(user => auth.currentUser && user.id !== auth.currentUser.uid && !friendsArray.includes(user.id));
 
             setUsers(allUsers);
           }
@@ -48,7 +46,7 @@ const ShareScreen: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleAcceptRequest = async (requestId) => {
+  const handleAcceptRequest = async (requestId: string) => {
     try {
       if (auth.currentUser) {
         const userDocRef = doc(db, 'users', auth.currentUser.uid);
@@ -56,7 +54,7 @@ const ShareScreen: React.FC = () => {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          const updatedRequests = userData.friendRequests.filter(request => request.id !== requestId);
+          const updatedRequests = userData.friendRequests.filter((request: { id: any; }) => request.id !== requestId);
           const updatedFriends = [...userData.friends, requestId];
 
           await updateDoc(userDocRef, {
@@ -74,7 +72,6 @@ const ShareScreen: React.FC = () => {
           const updatedUsers = users.filter(user => user.id !== requestId);
 
           setFriendRequests(updatedRequests);
-          setFriends(updatedFriends);
           setUsers(updatedUsers);
         }
       }
@@ -84,10 +81,10 @@ const ShareScreen: React.FC = () => {
     }
   };
 
-  const handleSendRequest = async (userId, name, email) => {
+  const handleSendRequest = async (userId: unknown, name: any, email: any) => {
     try {
       if (auth.currentUser) {
-        const recipientDocRef = doc(db, 'users', userId);
+        const recipientDocRef = doc(db, 'users', userId as string);
         await updateDoc(recipientDocRef, {
           friendRequests: arrayUnion({
             id: auth.currentUser.uid,
@@ -101,7 +98,7 @@ const ShareScreen: React.FC = () => {
           outgoingRequests: arrayUnion(userId)
         });
 
-        setOutgoingRequests(prev => [...prev, userId]);
+        setOutgoingRequests(prev => [...prev, userId as string]);
         Alert.alert('Invite Sent', `Friend request sent to ${name}`);
       }
     } catch (error) {

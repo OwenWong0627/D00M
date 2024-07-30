@@ -25,21 +25,21 @@ const CalendarScreen: React.FC = () => {
           const data = screenTimeDoc.data();
           const dailyData = data.dailyData;
 
-          const datesUnderLimit = {};
-          dailyData.forEach((day, index) => {
+          const datesUnderLimit: { [key: string]: any } = {};
+          dailyData.forEach((day: any, index: any) => {
             const date = day.date.toDate().toLocaleDateString();
-            const isStreakDay = day.appUsage.every((app) => app.used <= app.limit);
+            const isStreakDay = day.appUsage.every((app: any) => app.used <= app.limit);
             if (isStreakDay) {
               let markingType = 'single';
 
               const prevDay = dailyData[index - 1];
               const nextDay = dailyData[index + 1];
 
-              if (prevDay && nextDay && prevDay.appUsage.every((app) => app.used <= app.limit) && nextDay.appUsage.every((app) => app.used <= app.limit)) {
+              if (prevDay && nextDay && prevDay.appUsage.every((app: { used: number; limit: number; }) => app.used <= app.limit) && nextDay.appUsage.every((app: { used: number; limit: number; }) => app.used <= app.limit)) {
                 markingType = 'middle';
-              } else if (prevDay && prevDay.appUsage.every((app) => app.used <= app.limit)) {
+              } else if (prevDay && prevDay.appUsage.every((app: { used: number; limit: number; }) => app.used <= app.limit)) {
                 markingType = 'end';
-              } else if (nextDay && nextDay.appUsage.every((app) => app.used <= app.limit)) {
+              } else if (nextDay && nextDay.appUsage.every((app: { used: number; limit: number; }) => app.used <= app.limit)) {
                 markingType = 'start';
               }
 

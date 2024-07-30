@@ -4,7 +4,7 @@ import { auth, db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
 const Encouragements = () => {
-  const [encouragements, setEncouragements] = useState([]);
+  const [encouragements, setEncouragements] = useState<{ message: string, sender: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const screenHeight = Dimensions.get('window').height;
 

@@ -9,11 +9,11 @@ import { getLast7Days, getDayLabel } from '../../../utils/dateUtils';
 import Encouragements from '../../../components/Encouragements';
 
 const Home: React.FC = () => {
-  const [screenTimeData, setScreenTimeData] = useState([]);
+  const [screenTimeData, setScreenTimeData] = useState<{ app: string; used: number; limit: number; }[]>([]);
   const [trendsData, setTrendsData] = useState<{ day: string; used: number; limit: number; }[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [newScreenTimeData, setNewScreenTimeData] = useState([]);
+  const [newScreenTimeData, setNewScreenTimeData] = useState<{ app: string; used: number; limit: number; }[]>([]);
 
   useEffect(() => {
     const fetchScreenTimeData = async () => {
