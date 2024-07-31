@@ -73,10 +73,11 @@ const styles = StyleSheet.create({
   },
   signInText: {
     fontSize: 16,
-    color: '#000',
+    color: 'red',
   },
   signInLink: {
     textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
 });
 

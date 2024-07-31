@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { OnboardingItem, onboardingContent } from '../data/onboardingContent';
 import { useRouter } from 'expo-router';
@@ -19,6 +19,7 @@ interface OnboardingScreenProps {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext, scrollForward }) => {
   const router = useRouter();
   const sliderRef = useRef<any>(null);
+  const [totalScreenTime, setTotalScreenTime] = useState<number>(0);
 
   const handlePress = async () => {
     if (item.customComponent === 'SliderComponent' && sliderRef.current) {
@@ -69,11 +70,15 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext,
   if (item.customComponent === 'SliderComponent') {
     return (
       <View style={styles.container}>
-        <SliderComponent ref={sliderRef} onSliderChange={() => {}} />
+        <SliderComponent ref={sliderRef} onSliderChange={() => {}} onTotalScreenTimeChange={setTotalScreenTime} />
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
         {item.hasButton && (
-          <TouchableOpacity style={styles.button} onPress={handlePress}>
+          <TouchableOpacity
+            style={[styles.button, totalScreenTime === 0 && styles.disabledButton]}
+            onPress={totalScreenTime > 0 ? handlePress : () => {}}
+            disabled={totalScreenTime === 0}
+          >
             <Text style={styles.buttonText}>{item.buttonText}</Text>
           </TouchableOpacity>
         )}
@@ -82,7 +87,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ item, scrollToNext,
   }
 
   if (item.customComponent === 'SignUp') {
-    return <SignUp scrollToNext={scrollToNext} scrollForward={scrollForward}/>;
+    return <SignUp scrollToNext={scrollToNext} scrollForward={scrollForward} />;
   }
 
   return (
@@ -129,6 +134,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#000',
     borderRadius: 8,
+  },
+  disabledButton: {
+    backgroundColor: '#999',
   },
   buttonText: {
     color: '#fff',

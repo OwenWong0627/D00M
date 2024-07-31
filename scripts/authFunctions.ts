@@ -58,6 +58,7 @@ export const createScreenTimeData = async (userId: string, newDailyData: any) =>
     const updatedDailyData = [...screenTimeData.dailyData, newDailyData].sort((a, b) => Number(new Date(a.date)) - Number(new Date(b.date)));
     await setDoc(screenTimeDataDocRef, { dailyData: updatedDailyData });
   } else {
+    console.log('No screenTimeData document found, creating new one here');
     await setDoc(screenTimeDataDocRef, { dailyData: [newDailyData] });
   }
 };

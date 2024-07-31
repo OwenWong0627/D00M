@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { registerUser } from '../scripts/authFunctions';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -10,6 +11,7 @@ interface SignUpProps {
 }
 
 const SignUp: React.FC<SignUpProps> = ({ scrollToNext, scrollForward }) => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,6 +29,10 @@ const SignUp: React.FC<SignUpProps> = ({ scrollToNext, scrollForward }) => {
 
   const validatePassword = (password: string) => {
     return password.length >= 8;
+  };
+
+  const handleSignIn = () => {
+    router.replace('/signin');
   };
 
   useEffect(() => {
@@ -105,6 +111,11 @@ const SignUp: React.FC<SignUpProps> = ({ scrollToNext, scrollForward }) => {
       >
         <Text style={[styles.signUpButtonText, isFormValid && styles.signUpButtonTextEnabled]}>Sign up</Text>
       </TouchableOpacity>
+      <View style={styles.signInButtonContainer}>
+        <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+          <Text style={styles.signInText}>Already have an account? <Text style={styles.signInLink}>Sign in</Text></Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -182,6 +193,22 @@ const styles = StyleSheet.create({
   },
   signUpButtonTextEnabled: {
     color: '#fff',
+  },
+  signInButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  signInButton: {
+    alignItems: 'center',
+  },
+  signInText: {
+    fontSize: 16,
+    color: 'red',
+  },
+  signInLink: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
 });
 

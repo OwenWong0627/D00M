@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Dimensions 
 import { useRouter } from 'expo-router';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { auth, db } from '../firebase/firebaseConfig';
-import { loginUser } from '../scripts/authFunctions';
+import { createScreenTimeData, loginUser } from '../scripts/authFunctions';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const { width } = Dimensions.get('window');
@@ -17,41 +17,44 @@ const SignIn: React.FC = () => {
     try {
       const userCredential = await loginUser(email, password);
 
-      const currentDate = new Date().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+      const currentDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
       const screenTimeDocRef = doc(db, 'screenTimeData', userCredential.uid);
-      const screenTimeDocSnap = await getDoc(screenTimeDocRef);
 
-      if (screenTimeDocSnap.exists()) {
-        const dailyData = screenTimeDocSnap.data().dailyData;
-        const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === currentDate.toString());
+      const settingsDocRef = doc(db, 'settings', userCredential.uid);
+      const settingsDocSnap = await getDoc(settingsDocRef);
 
-        if (!todayData) {
-          console.log('No data found for today.')
-          const settingsDocRef = doc(db, 'settings', userCredential.uid);
-          const settingsDocSnap = await getDoc(settingsDocRef);
+      if (settingsDocSnap.exists()) {
+        const appLimits = settingsDocSnap.data().appLimits;
+        const screenTimeDocSnap = await getDoc(screenTimeDocRef);
 
-          if (settingsDocSnap.exists()) {
-            const appLimits = settingsDocSnap.data().appLimits;
-            const newScreenTimeData = {
-              date: new Date(),
-              totalScreenTime: appLimits.reduce((acc: number, app: { limit: number }) => acc + app.limit, 0),
-              appUsage: appLimits.map((limit: any) => ({
-                app: limit.app,
-                used: 0,
-                limit: limit.limit,
-              })),
-            };
-            console.log(newScreenTimeData)
+        const newScreenTimeData = {
+          date: new Date(),
+          totalScreenTime: appLimits.reduce((acc: number, app: { limit: number }) => acc + app.limit, 0),
+          appUsage: appLimits.map((limit: any) => ({
+            app: limit.app,
+            used: 0,
+            limit: limit.limit,
+          })),
+        };
+        console.log(newScreenTimeData);
+
+        if (screenTimeDocSnap.exists()) {
+          const dailyData = screenTimeDocSnap.data().dailyData;
+          const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' }) === currentDate.toString());
+
+          if (!todayData) {
+            console.log('No data found for today.');
 
             await setDoc(screenTimeDocRef, {
               dailyData: [...dailyData, newScreenTimeData],
             }, { merge: true });
-          } else {
-            console.log('No settings document found.');
           }
+        } else {
+          console.log('No screenTimeData document found.');
+          await createScreenTimeData(userCredential.uid, newScreenTimeData);
         }
       } else {
-        console.log('No screenTimeData document found.');
+        console.log('No settings document found.');
       }
 
       router.replace('/tabs/home'); // Navigate to the dashboard or home screen
