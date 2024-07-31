@@ -61,7 +61,7 @@ const Goals: React.FC = () => {
         goalType,
         hours,
         minutes,
-        date: date.toISOString(),
+        date: date.toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}),
         description: goal,
       };
 
@@ -136,7 +136,7 @@ const Goals: React.FC = () => {
       <View style={styles.rowContainer}>
         <Text style={styles.label}>By</Text>
         <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-          <Text>{date.toLocaleDateString()}</Text>
+          <Text>{date.toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'})}</Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker

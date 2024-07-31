@@ -24,15 +24,15 @@ const Home: React.FC = () => {
           const dailyData = docSnap.data().dailyData;
 
           // Set screenTimeData for CircleGraph
-          const todayDate = new Date().toLocaleDateString();
-          const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString() === todayDate.toString());
+          const todayDate = new Date().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+          const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === todayDate.toString());
           setScreenTimeData(todayData ? todayData.appUsage : []);
           setNewScreenTimeData(todayData ? todayData.appUsage.filter((app: any) => app.limit > 0) : []);
 
           // Set trendsData for TrendsGraph
           const last7Days = getLast7Days();
           const trendsData = last7Days.map((date) => {
-            const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString() === date.toString()) || {
+            const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === date.toString()) || {
               date,
               totalScreenTime: 0,
               appUsage: [],
@@ -65,8 +65,8 @@ const Home: React.FC = () => {
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {
         const dailyData = docSnap.data().dailyData;
-        const todayDate = new Date().toLocaleDateString();
-        const todayDataIndex = dailyData.findIndex((data: any) => data.date.toDate().toLocaleDateString() === todayDate);
+        const todayDate = new Date().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+        const todayDataIndex = dailyData.findIndex((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === todayDate);
 
         if (todayDataIndex !== -1) {
           dailyData[todayDataIndex].appUsage = newScreenTimeData;
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
           //also update trendsData
           const last7Days = getLast7Days();
           const trendsData = last7Days.map((date) => {
-            const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString() === date.toString()) || {
+            const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === date.toString()) || {
               date,
               totalScreenTime: 0,
               appUsage: [],

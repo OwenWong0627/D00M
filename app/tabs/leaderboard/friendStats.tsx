@@ -40,7 +40,7 @@ const FriendStats: React.FC = () => {
             // Set trendsData for TrendsGraph
             const last7Days = getLast7Days();
             const trendsData = last7Days.map((date) => {
-              const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString() === date.toString()) || {
+              const dayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}) === date.toString()) || {
                 date,
                 totalScreenTime: 0,
                 appUsage: [],
@@ -103,7 +103,7 @@ const FriendStats: React.FC = () => {
       <MotivationBottomDrawer
         visible={isDrawerVisible}
         onClose={() => setDrawerVisible(false)}
-        recipientId={id}
+        recipientId={id ?? ''}
       />
     </ScrollView>
   );
