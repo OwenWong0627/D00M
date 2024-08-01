@@ -40,7 +40,7 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
         goalType,
         hours,
         minutes,
-        date: date.toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}),
+        date: date.toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'}),
         description: goal,
         appLimits: [
           { app: 'Instagram', limit: 0 },
@@ -121,7 +121,7 @@ const GoalSettingPage: React.FC<GoalSettingPageProps> = ({ scrollToNext }) => {
       <View style={styles.rowContainer}>
         <Text style={styles.label}>By</Text>
         <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-          <Text>{date.toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'})}</Text>
+          <Text>{date.toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'})}</Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker

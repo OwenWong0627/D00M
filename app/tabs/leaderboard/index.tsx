@@ -92,11 +92,11 @@ const Leaderboard: React.FC = () => {
 
   const calculateCurrentStreak = (dailyData: any) => {
     let streak = 0;
-    const today = new Date().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+    const today = new Date().toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'});
 
     for (let i = dailyData.length - 1; i >= 0; i--) {
       const day = dailyData[i];
-      const date = day.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+      const date = day.date.toDate().toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'});
 
       if (date > today) continue;
 

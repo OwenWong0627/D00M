@@ -17,7 +17,7 @@ const SignIn: React.FC = () => {
     try {
       const userCredential = await loginUser(email, password);
 
-      const currentDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+      const currentDate = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
       const screenTimeDocRef = doc(db, 'screenTimeData', userCredential.uid);
 
       const settingsDocRef = doc(db, 'settings', userCredential.uid);
@@ -40,7 +40,7 @@ const SignIn: React.FC = () => {
 
         if (screenTimeDocSnap.exists()) {
           const dailyData = screenTimeDocSnap.data().dailyData;
-          const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' }) === currentDate.toString());
+          const todayData = dailyData.find((data: any) => data.date.toDate().toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }) === currentDate.toString());
 
           if (!todayData) {
             console.log('No data found for today.');

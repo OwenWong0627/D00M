@@ -11,7 +11,7 @@ const screenWidth = Dimensions.get('window').width;
 
 const CalendarScreen: React.FC = () => {
   const router = useRouter();
-  const today = new Date().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+  const today = new Date().toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'});
   const [markedDates, setMarkedDates] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,7 @@ const CalendarScreen: React.FC = () => {
 
           const datesUnderLimit: { [key: string]: any } = {};
           dailyData.forEach((day: any, index: any) => {
-            const date = day.date.toDate().toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'});
+            const date = day.date.toDate().toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'});
             const isStreakDay = day.appUsage.every((app: any) => app.used <= app.limit);
             if (isStreakDay) {
               let markingType = 'single';

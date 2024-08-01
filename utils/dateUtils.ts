@@ -4,7 +4,7 @@ export const getLast7Days = () => {
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    result.push(date.toLocaleDateString(undefined, {year: 'numeric', month: '2-digit', day: '2-digit'}).split('T')[0]); // Format date as YYYY-MM-DD
+    result.push(date.toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('T')[0]); // Format date as YYYY-MM-DD
   }
   return result;
 };
