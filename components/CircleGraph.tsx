@@ -6,13 +6,13 @@ import { ImageSourcePropType } from 'react-native';
 const { width } = Dimensions.get('window');
 
 const appData = [
-  { app: 'Instagram', color: '#8a3ab9', darkColor: '#5c256e', logo: require('../assets/images/instagram.png') },
-  { app: 'Facebook', color: '#3b5998', darkColor: '#2a3d6e', logo: require('../assets/images/facebook.png') },
-  { app: 'YouTube', color: '#FF0000', darkColor: '#cc0000', logo: require('../assets/images/youtube.png') },
-  { app: 'TikTok', color: '#ee1d52', darkColor: '#aa0030', logo: require('../assets/images/tiktok.png') },
-  { app: 'Snapchat', color: '#FFFC00', darkColor: '#d4d400', logo: require('../assets/images/snapchat.png') },
-  { app: 'Reddit', color: '#FF5700', darkColor: '#cc4600', logo: require('../assets/images/reddit.png') },
-  { app: 'X', color: '#1da1f2', darkColor: '#177bc2', logo: require('../assets/images/twitter.png') }
+  { app: 'Instagram', color: '#8a3ab9', darkColor: '#000', logo: require('../assets/images/instagram.png') },
+  { app: 'Facebook', color: '#3b5998', darkColor: '#000', logo: require('../assets/images/facebook.png') },
+  { app: 'YouTube', color: '#FF0000', darkColor: '#000', logo: require('../assets/images/youtube.png') },
+  { app: 'TikTok', color: '#ee1d52', darkColor: '#000', logo: require('../assets/images/tiktok.png') },
+  { app: 'Snapchat', color: '#FFFC00', darkColor: '#000', logo: require('../assets/images/snapchat.png') },
+  { app: 'Reddit', color: '#FF5700', darkColor: '#000', logo: require('../assets/images/reddit.png') },
+  { app: 'X', color: '#1da1f2', darkColor: '#000', logo: require('../assets/images/twitter.png') }
 ];
 
 interface CircleGraphProps {
@@ -25,9 +25,11 @@ const CircleGraph: React.FC<CircleGraphProps> = ({ screenTimeData, disableLabels
   const filteredData = screenTimeData.filter(d => d.limit > 0);
   const colors = filteredData.flatMap(d => {
     const appInfo = appData.find(app => app.app === d.app);
-    return appInfo ? [appInfo.color, appInfo.darkColor] : ['#fff', '#fff'];
+    return appInfo ? [appInfo.darkColor, appInfo.color, '#fff'] : ['#fff', '#fff', '#fff',];
   });
-  const data = filteredData.flatMap(d => [Math.min(d.used, d.limit), d.limit - Math.min(d.used, d.limit)]);
+  const totalTimeLimit = filteredData.reduce((total, d) => total + d.limit, 0);
+  const centerData = filteredData.flatMap(d => [Math.min(d.used, d.limit), d.limit - Math.min(d.used, d.limit)]);
+  const data = filteredData.flatMap(d => [Math.min(d.used, d.limit), d.limit - Math.min(d.used, d.limit), (filteredData.length === 1 ? 0 : (totalTimeLimit/360)*3)]);
   const logos = filteredData.map(d => {
     const appInfo = appData.find(app => app.app === d.app);
     return appInfo ? appInfo.logo : null;
@@ -47,8 +49,8 @@ const CircleGraph: React.FC<CircleGraphProps> = ({ screenTimeData, disableLabels
           />
           <View style={styles.centerTextContainer}>
             <Text style={styles.centerText}>
-              {Math.floor(data.reduce((acc, value) => acc + value, 0) / 60)} HOURS{"\n"}
-              {data.reduce((acc, value) => acc + value, 0) % 60} MIN
+              {Math.floor(centerData.reduce((acc, value) => acc + value, 0) / 60)} HOURS{"\n"}
+              {centerData.reduce((acc, value) => acc + value, 0) % 60} MIN
             </Text>
           </View>
         </View>
@@ -56,7 +58,7 @@ const CircleGraph: React.FC<CircleGraphProps> = ({ screenTimeData, disableLabels
           <View style={styles.labelsContainer}>
             {filteredData.map((d, index) => (
               <View key={index} style={styles.label}>
-                <View style={[styles.colorBox, { backgroundColor: colors[index * 2] }]} />
+                <View style={[styles.colorBox, { backgroundColor: colors[(index * 3)+1] }]} />
                 {logos[index] && <Image source={logos[index]} style={styles.logo} />}
                 <Text>: {d.used}/{d.limit} mins</Text>
               </View>

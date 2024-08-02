@@ -9,6 +9,7 @@ const { width } = Dimensions.get('window');
 interface SliderComponentProps {
   onSliderChange: () => void;
   onTotalScreenTimeChange: (totalScreenTime: number) => void;
+  onErrorChange: (error: boolean) => void; // New prop to handle error change
 }
 
 const SliderComponent = forwardRef((props: SliderComponentProps, ref) => {
@@ -55,8 +56,10 @@ const SliderComponent = forwardRef((props: SliderComponentProps, ref) => {
     props.onTotalScreenTimeChange(totalScreenTime);
     if (totalScreenTime > goalLimit) {
       setErrorMessage(`Total screen time (${totalScreenTime} min) exceeds your goal limit (${goalLimit} min)`);
+      props.onErrorChange(true);
     } else {
       setErrorMessage('');
+      props.onErrorChange(false);
     }
   }, [sliders, goalLimit]);
 

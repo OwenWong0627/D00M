@@ -67,8 +67,8 @@ const Goals: React.FC = () => {
 
       const userDocRef = doc(db, 'settings', auth.currentUser.uid);
       await updateDoc(userDocRef, settings);
-      Alert.alert('Success', 'Goal updated successfully', [
-        { text: 'OK', onPress: () => router.back() },
+      Alert.alert('Success', 'Goal updated successfully, please update your screentime limits if needed', [
+        { text: 'OK', onPress: () => router.replace('/tabs/settings/limits') },
       ]);
     } else {
       Alert.alert('Error', 'No user is currently logged in.');

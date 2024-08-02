@@ -1,45 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder, TouchableWithoutFeedback, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, PanResponder, TouchableWithoutFeedback, Alert, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
 import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase/firebaseConfig';
 
-const motivationalMessages = [
-  'Way to prioritize your well-being!',
-  "You're creating healthy habits. Well done!",
-  "You've got this! Stay mindful.",
-  'Great to see you taking control.',
-];
-
 const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void; recipientId: string }> = ({ visible, onClose, recipientId }) => {
-  const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredMessages, setFilteredMessages] = useState(motivationalMessages);
+  const [inputText, setInputText] = useState('');
+  const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!visible) {
-      setSelectedMessage(null);
-      setSearchQuery('');
+      setInputText('');
+      setGeneratedMessage(null);
     }
   }, [visible]);
 
-  useEffect(() => {
-    setFilteredMessages(
-      motivationalMessages.filter((message) =>
-        message.toLowerCase().startsWith(searchQuery.toLowerCase())
-      )
-    );
-  }, [searchQuery]);
+  const generateMotivationalMessage = async () => {
+    if (!inputText) return;
+    setLoading(true);
+    try {
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a motivational assistant.',
+          },
+          {
+            role: 'user',
+            content: `Generate a short motivational message with a maximum of 20 words based on the following prompt: ${inputText}`,
+          },
+        ],
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const message = response.data.choices[0].message.content.trim();
+      setGeneratedMessage(message);
+    } catch (error) {
+      console.error('Error generating message: ', error.response ? error.response.data : error.message);
+      const errorMessage = error.response ? error.response.data.error.message : error.message;
+      Alert.alert('Error', `Failed to generate motivational message: ${errorMessage}`);
+    }
+    setLoading(false);
+  };
 
   const handleSendEncouragement = async () => {
-    if (!selectedMessage) return;
+    if (!generatedMessage) return;
 
     try {
       const userDocRef = doc(db, 'users', recipientId);
       const userDocSnap = await getDoc(userDocRef);
       if (userDocSnap.exists()) {
         const encouragement = {
-          message: selectedMessage,
+          message: generatedMessage,
           sender: auth.currentUser?.displayName || 'Anonymous',
           timestamp: new Date(),
         };
@@ -75,35 +94,32 @@ const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void; 
           <TouchableWithoutFeedback>
             <View style={styles.modalContent} {...panResponder.panHandlers}>
               <View style={styles.dragHandle} />
-              <View style={styles.searchContainer}>
-                <Ionicons name="search-outline" size={20} color="#000" />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search for an encouragement"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-              </View>
-              <Text style={styles.sectionTitle}>Encouragements</Text>
-              {filteredMessages.map((message, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.messageButton,
-                    selectedMessage === message && styles.selectedMessageButton,
-                  ]}
-                  onPress={() => setSelectedMessage(message)}
-                >
-                  <Text style={styles.messageText}>{message}</Text>
-                </TouchableOpacity>
-              ))}
+              <Text style={styles.sectionTitle}>Generate a Custom Encouragement</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter a prompt for a motivational message"
+                value={inputText}
+                onChangeText={setInputText}
+              />
+              {loading && <ActivityIndicator size="large" color="#000" />}
+              {generatedMessage && !loading && <Text style={styles.generatedMessageText}>{generatedMessage}</Text> }
               <TouchableOpacity
-                style={[styles.doneButton, !selectedMessage && styles.disabledDoneButton]}
-                onPress={handleSendEncouragement}
-                disabled={!selectedMessage}
+                style={styles.generateButton}
+                onPress={generateMotivationalMessage}
+                disabled={!inputText || loading}
               >
-                <Text style={styles.doneButtonText}>Done</Text>
+                <Text style={styles.generateButtonText}>{generatedMessage ? "Re-Generate Message" : "Generate Message"}</Text>
               </TouchableOpacity>
+              {generatedMessage && (
+                <View>
+                  <TouchableOpacity
+                    style={styles.doneButton}
+                    onPress={handleSendEncouragement}
+                  >
+                    <Text style={styles.doneButtonText}>Send</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -131,47 +147,43 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: 10,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    marginLeft: 10,
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
-  messageButton: {
+  input: {
+    height: 40,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#000',
-    borderRadius: 20,
-    padding: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
-  selectedMessageButton: {
-    backgroundColor: '#f0f0f0',
+  generateButton: {
+    backgroundColor: '#000',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
   },
-  messageText: {
+  generateButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  generatedMessageText: {
     fontSize: 16,
     textAlign: 'center',
+    marginVertical: 20,
   },
   doneButton: {
     backgroundColor: '#000',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 20,
-  },
-  disabledDoneButton: {
-    backgroundColor: '#ccc',
+    marginTop: 10,
   },
   doneButtonText: {
     fontSize: 16,

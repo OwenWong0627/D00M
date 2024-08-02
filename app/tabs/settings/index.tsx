@@ -46,13 +46,11 @@ const Settings: React.FC = () => {
           <Text style={styles.rowText}>Goals</Text>
           <Ionicons name="chevron-forward-outline" size={24} color="#000" />
         </TouchableOpacity>
-      </View>
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.row} onPress={() => router.push('/tabs/settings/notifications')}>
+        {/* <TouchableOpacity style={styles.row} onPress={() => router.push('/tabs/settings/notifications')}>
           <Ionicons name="notifications-outline" size={24} color="#000" style={styles.rowIcon} />
           <Text style={styles.rowText}>Notifications</Text>
           <Ionicons name="chevron-forward-outline" size={24} color="#000" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.row} onPress={() => router.push('/tabs/settings/limits')}>
           <Ionicons name="key-outline" size={24} color="#000" style={styles.rowIcon} />
           <Text style={styles.rowText}>Limits</Text>

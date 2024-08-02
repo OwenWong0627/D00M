@@ -9,6 +9,7 @@ const Limits: React.FC = () => {
   const sliderRef = useRef<any>(null);
   const [isSliderInteracted, setIsSliderInteracted] = useState(false);
   const [totalScreenTime, setTotalScreenTime] = useState<number>(0);
+  const [hasError, setHasError] = useState<boolean>(false); // New state for error
 
   const handleSliderInteraction = () => {
     setIsSliderInteracted(true);
@@ -16,6 +17,10 @@ const Limits: React.FC = () => {
 
   const handleTotalScreenTimeChange = (totalTime: number) => {
     setTotalScreenTime(totalTime);
+  };
+
+  const handleErrorChange = (error: boolean) => { // New handler for error
+    setHasError(error);
   };
 
   const handleSubmit = async () => {
@@ -35,16 +40,17 @@ const Limits: React.FC = () => {
         ref={sliderRef}
         onSliderChange={handleSliderInteraction}
         onTotalScreenTimeChange={handleTotalScreenTimeChange}
+        onErrorChange={handleErrorChange} // Pass the new handler
       />
       <Text style={styles.description}>
-        Manually adjust your screen time limit or Let our AI do it for you!
+        Manually adjust your screen time limit!
       </Text>
       <TouchableOpacity
-        style={[styles.submitButton, isSliderInteracted && totalScreenTime > 0 && styles.submitButtonEnabled]}
+        style={[styles.submitButton, isSliderInteracted && !hasError && styles.submitButtonEnabled]}
         onPress={handleSubmit}
-        disabled={!isSliderInteracted || totalScreenTime === 0}
+        disabled={!isSliderInteracted || hasError}
       >
-        <Text style={styles.submitButtonText}>Submit for review</Text>
+        <Text style={styles.submitButtonText}>Change Screen Time Limit</Text>
       </TouchableOpacity>
     </View>
   );
@@ -58,6 +64,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginBottom: 20,
+    marginTop: 20,
   },
   title: {
     fontSize: 24,

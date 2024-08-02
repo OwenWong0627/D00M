@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SplashScreen } from "expo-router";
 
-const InitialScreen: React.FC = () => {
+const App: React.FC = () => {
   const router = useRouter();
 
   const handleGetStarted = () => {
@@ -35,6 +36,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
     padding: 20,
   },
   image: {
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
     marginBottom: 65,
   },
   getStartedButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#eee',
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -81,4 +83,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InitialScreen;
+export default App;

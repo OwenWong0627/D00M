@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginBottom: 20,
+    marginTop: 20,
   },
   backButtonText: {
     fontSize: 24,
