@@ -30,7 +30,7 @@ const MotivationBottomDrawer: React.FC<{ visible: boolean; onClose: () => void; 
           },
           {
             role: 'user',
-            content: `Generate a short motivational message with a maximum of 20 words based on the following prompt: ${inputText}`,
+            content: `Generate a short motivational message that incorporates gameful or playful design with a maximum of 20 words while mentioning used social media apps based on the following prompt: ${inputText}`,
           },
         ],
       }, {
