@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignSelf: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 10,
     marginLeft: 20,
-    marginTop: 10,
+    marginTop: 20,
   },
   title: {
     fontSize: 24,
