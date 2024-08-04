@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from 'react-native';
 import { auth, db } from '../../../firebase/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -7,6 +7,7 @@ import CircleGraph from '../../../components/CircleGraph';
 import TrendsGraph from '../../../components/TrendsGraph';
 import { getLast7Days, getDayLabel } from '../../../utils/dateUtils';
 import Encouragements from '../../../components/Encouragements';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Home: React.FC = () => {
   const [screenTimeData, setScreenTimeData] = useState<{ app: string; used: number; limit: number; }[]>([]);
@@ -14,6 +15,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [newScreenTimeData, setNewScreenTimeData] = useState<{ app: string; used: number; limit: number; }[]>([]);
+  const [goalTitle, setGoalTitle] = useState<string>('');
 
   useEffect(() => {
     const fetchScreenTimeData = async () => {
@@ -58,6 +60,35 @@ const Home: React.FC = () => {
 
     fetchScreenTimeData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchGoalSettings = async () => {
+        if (auth.currentUser) {
+          const settingsDocRef = doc(db, 'settings', auth.currentUser.uid);
+          const settingsDocSnap = await getDoc(settingsDocRef);
+          if (settingsDocSnap.exists()) {
+            const data = settingsDocSnap.data();
+            const { goalType, hours, minutes, description } = data;
+            let goalTitle = `I want to ${goalType.toLowerCase()} screen time to `;
+            if (hours > 0) {
+              goalTitle += `${hours} hours `;
+            }
+            if (minutes > 0 && hours > 0) {
+              goalTitle += `and ${minutes} minutes `;
+            }
+            if (minutes > 0 && hours === 0) {
+              goalTitle += `${minutes} minutes `;
+            }
+            goalTitle += `to "${description}"`;
+            setGoalTitle(goalTitle);
+          }
+        }
+      };
+
+      fetchGoalSettings();
+    }, [])
+  );
 
   const handleUpdateScreenTime = async () => {
     if (auth.currentUser) {
@@ -111,6 +142,7 @@ const Home: React.FC = () => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Header />
+      <Text style={styles.goalTitle}>{goalTitle}</Text>
       <CircleGraph screenTimeData={screenTimeData} />
       <TouchableOpacity style={styles.updateButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.updateButtonText}>Update Screen Time</Text>
@@ -162,6 +194,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  goalTitle: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 10,
   },
   subtitle: {
     fontSize: 18,

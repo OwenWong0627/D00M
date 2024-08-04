@@ -166,7 +166,7 @@ const pickerSelectStyles = StyleSheet.create({
     color: 'black',
     paddingRight: 30,
     marginLeft: 10,
-    marginRight: 40,
+    marginRight: 30,
     marginBottom: 5,
   },
   inputAndroid: {
@@ -179,7 +179,7 @@ const pickerSelectStyles = StyleSheet.create({
     color: 'black',
     paddingRight: 30,
     marginLeft: 10,
-    marginRight: 40,
+    marginRight: 30,
     marginBottom: 5,
   },
 });
