@@ -1,28 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import { auth, db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Encouragements = () => {
   const [encouragements, setEncouragements] = useState<{ message: string, sender: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const screenHeight = Dimensions.get('window').height;
 
-  useEffect(() => {
-    const fetchEncouragements = async () => {
-      if (auth.currentUser) {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setEncouragements(data.encouragements.reverse() || []);
-        }
-        setLoading(false);
+  const fetchEncouragements = async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setEncouragements(data.encouragements.reverse() || []);
       }
-    };
+      setLoading(false);
+    }
+  };
 
-    fetchEncouragements();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchEncouragements();
+    }, [])
+  );
 
   if (loading) {
     return (
